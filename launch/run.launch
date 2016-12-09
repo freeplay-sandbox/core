@@ -1,0 +1,9 @@
+<launch>
+
+  <arg name="image" default="/camera/image_raw" />
+  <remap from="image" to="$(arg image)" />
+  
+  <node pkg="ros_opencv_sandbox" type="run" name="ros_opencv_sandox" output="screen">
+  </node>
+
+</launch>
