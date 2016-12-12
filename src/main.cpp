@@ -69,16 +69,28 @@ inline double heuristic(Location a, Location b) {
   return abs(x1 - x2) + abs(y1 - y2);
 }
 
-inline uint8_t cost(const nav_msgs::OccupancyGrid map, Location a) {
+inline int cost(const nav_msgs::OccupancyGrid map, Location a) {
     int x, y;
     tie (x, y) = a;
 
-    assert(x>=0 && y>=0 && x<map.info.width && y<map.info.height);
+    const float COST_SCALE=1;
+    int _cost = 50 * COST_SCALE;
 
-    auto raw = map.data[(map.info.height-y) * map.info.width + x];
-    if (raw < 0) raw = 50; // raw = -1 -> occupancy unknown; let assign an average cost
+    if (x>=0 && y>=0 && x<map.info.width && y<map.info.height) {
+        auto raw = map.data[(map.info.height-y) * map.info.width + x];
+        if (raw >= 0) { // raw = -1 -> occupancy unknown; let assign an average cost
+            _cost = raw * COST_SCALE;
+        }
+    }
+    else {
+        // --> if outside of the map, the cost grows linearly with the distance to the map.
+        if (x < 0) _cost = cost(map, {0, y}) + (-x * 10);
+        if (y < 0) _cost = cost(map, {x, 0}) + (-y * 10);
+        if (x >= (int)map.info.width) _cost = cost(map, {map.info.width - 1, y}) + ((x - map.info.width) * 10);
+        if (y >= (int)map.info.height) _cost = cost(map, {x, map.info.height - 1}) + ((y - map.info.height) * 10);
+    }
 
-    return raw * 10;
+    return _cost;
 }
 
 inline Location to_map(double x, double y) {
@@ -116,18 +128,16 @@ struct PriorityQueue {
 
 std::vector<Location> neighbours(const nav_msgs::OccupancyGrid& map, Location p){
 
-    int width=(int)map.info.width, height=(int)map.info.height;
-
     vector<Location> nghbs;
 
-    if (p.first > 0) nghbs.push_back({p.first-1, p.second});
-    if (p.first > 0 && p.second > 0) nghbs.push_back({p.first-1, p.second-1});
-    if (p.second > 0) nghbs.push_back({p.first, p.second-1});
-    if (p.first < width-1 && p.second > 0) nghbs.push_back({p.first+1, p.second-1});
-    if (p.first < width-1) nghbs.push_back({p.first+1, p.second});
-    if (p.first < width-1 && p.second < height-1) nghbs.push_back({p.first+1, p.second+1});
-    if (p.second < height-1) nghbs.push_back({p.first, p.second+1});
-    if (p.first > 0 && p.second < height-1) nghbs.push_back({p.first-1, p.second+1});
+    nghbs.push_back({p.first-1, p.second-1});
+    nghbs.push_back({p.first-1, p.second});
+    nghbs.push_back({p.first-1, p.second+1});
+    nghbs.push_back({p.first, p.second-1});
+    nghbs.push_back({p.first, p.second+1});
+    nghbs.push_back({p.first+1, p.second-1});
+    nghbs.push_back({p.first+1, p.second});
+    nghbs.push_back({p.first+1, p.second+1});
 
     return nghbs;
 
@@ -148,13 +158,13 @@ std::vector<Location> astar(const nav_msgs::OccupancyGrid& map, Location start, 
     cost_so_far[start] = 0;
 
 
-    cout << "Cost map:" << endl;
-    for(uint8_t y=0;y<map.info.height;y++) {
-        for(uint8_t x=0;x<map.info.width;x++) {
-            cout << (int)(cost(map, {x,y}) / 100.);
-        }
-        cout << endl;
-    }
+    //cout << "Cost map:" << endl;
+    //for(int y=0;y<map.info.height;y++) {
+    //    for(int x=0;x<map.info.width;x++) {
+    //        cout << (int)(cost(map, {x,y}) / 100.);
+    //    }
+    //    cout << endl;
+    //}
     cout << "Starting A*...";
     while (!frontier.empty()) {
         auto current = frontier.get();
