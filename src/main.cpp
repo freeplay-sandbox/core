@@ -1,6 +1,9 @@
 #include <string>
 #include <map>
 #include <utility> // for std::pair
+#include <iterator>
+#include <algorithm>
+#include <queue>
 
 // opencv3
 #include <opencv2/core/core.hpp>
@@ -66,10 +69,16 @@ inline double heuristic(Location a, Location b) {
   return abs(x1 - x2) + abs(y1 - y2);
 }
 
-inline signed char cost(const nav_msgs::OccupancyGrid map, Location a) {
+inline uint8_t cost(const nav_msgs::OccupancyGrid map, Location a) {
     uint8_t x, y;
     tie (x, y) = a;
-    return map.data[x * map.info.width + y];
+
+    assert(x>=0 && y>=0 && x<map.info.width && y<map.info.height);
+
+    auto raw = map.data[(map.info.height-y) * map.info.width + x];
+    if (raw < 0) raw = 50; // raw = -1 -> occupancy unknown; let assign an average cost
+
+    return raw * 10;
 }
 
 inline Location onmap(double x, double y) {
@@ -87,22 +96,95 @@ inline std::pair<double, double> frommap(Location a) {
     return {x * RESOLUTION, -y * RESOLUTION};
 }
 
+// from http://www.redblobgames.com/pathfinding/a-star/implementation.html
+template<typename T, typename priority_t>
+struct PriorityQueue {
+  typedef pair<priority_t, T> PQElement;
+  priority_queue<PQElement, vector<PQElement>,
+                 std::greater<PQElement>> elements;
 
+  inline bool empty() const { return elements.empty(); }
+
+  inline void put(T item, priority_t priority) {
+    elements.emplace(priority, item);
+  }
+
+  inline T get() {
+    T best_item = elements.top().second;
+    elements.pop();
+    return best_item;
+  }
+};
+
+std::vector<Location> neighbours(const nav_msgs::OccupancyGrid& map, Location p){
+
+    uint8_t width=map.info.width, height=map.info.height;
+
+    vector<Location> nghbs;
+
+    if (p.first > 0) nghbs.push_back({p.first-1, p.second});
+    if (p.first > 0 && p.second > 0) nghbs.push_back({p.first-1, p.second-1});
+    if (p.second > 0) nghbs.push_back({p.first, p.second-1});
+    if (p.first < width-1 && p.second > 0) nghbs.push_back({p.first+1, p.second-1});
+    if (p.first < width-1) nghbs.push_back({p.first+1, p.second});
+    if (p.first < width-1 && p.second < height-1) nghbs.push_back({p.first+1, p.second+1});
+    if (p.second < height-1) nghbs.push_back({p.first, p.second+1});
+    if (p.first > 0 && p.second < height-1) nghbs.push_back({p.first-1, p.second+1});
+
+    return nghbs;
+
+}
+
+// based on http://www.redblobgames.com/pathfinding/a-star/implementation.html
 std::vector<Location> astar(const nav_msgs::OccupancyGrid& map, Location start, Location goal) {
-    auto path = vector<Location>();
 
-    uint8_t x = start.first, y = start.second;
+    vector<Location> path;
 
-    while(x != goal.first) {
-        start.first < goal.first ? x++ : x--;
-        path.push_back({x, start.second});
+    std::map<Location,Location> came_from;
+    std::map<Location,int> cost_so_far;
+
+    PriorityQueue<Location, double> frontier;
+    frontier.put(start, 0);
+
+    came_from[start] = start;
+    cost_so_far[start] = 0;
+
+
+    cout << "Cost map:" << endl;
+    for(uint8_t y=0;y<map.info.height;y++) {
+        for(uint8_t x=0;x<map.info.width;x++) {
+            cout << (int)(cost(map, {x,y}) / 100.);
+        }
+        cout << endl;
+    }
+    cout << "Starting A*...";
+    while (!frontier.empty()) {
+        auto current = frontier.get();
+
+        if (current == goal) {
+            break;
+        }
+
+        for (auto next : neighbours(map, current)) {
+            int new_cost = cost_so_far[current] + cost(map, next);
+            if (!cost_so_far.count(next) || new_cost < cost_so_far[next]) {
+                cost_so_far[next] = new_cost;
+                double priority = new_cost + heuristic(next, goal);
+                frontier.put(next, priority);
+                came_from[next] = current;
+            }
+        }
     }
 
-    while(y != goal.second) {
-        start.second < goal.second ? y++ : y--;
-        path.push_back({goal.first, y});
+    Location next = goal;
+    while(true) {
+        path.push_back(next);
+        if (next == start) break;
+        next = came_from[next];
     }
+    std::reverse(std::begin(path), std::end(path));
 
+    cout << "done." << endl;
     cout << "Publishing path (" << path.size() << " points)" << endl;
     return path;
 
