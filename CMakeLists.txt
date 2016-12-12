@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
         cv_bridge 
         image_transport 
         visualization_msgs
+        nav_msgs
         image_geometry 
         nodelet)
 

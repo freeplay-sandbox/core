@@ -12,16 +12,16 @@
 #include <sensor_msgs/Image.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <geometry_msgs/PointStamped.h>
+#include <nav_msgs/OccupancyGrid.h>
 #include <cv_bridge/cv_bridge.h>
 
 using namespace std;
 using namespace cv;
 
-const double physicalMapWidth = 0.62;
-const double physicalMapHeight = 0.42;
+const double physicalMapWidth = 0.62; //m
+const double physicalMapHeight = 0.42; //m
 
-const double meters2pixels = 1000;
-
+const double RESOLUTION=0.01; // m per cell
 
 map<string, vector<geometry_msgs::PointStamped>> footprints;
 
@@ -100,18 +100,28 @@ int main(int argc, char* argv[])
 
     tf::TransformListener listener;
 
-    image_transport::ImageTransport it(rosNode);
 
     ros::Subscriber footprints_sub = rosNode.subscribe("footprints", 10, getFootprints);
+    ros::Publisher occupancygrid_pub = rosNode.advertise<nav_msgs::OccupancyGrid>("map", 1);
 
-    image_transport::Publisher occupancygrid_pub = it.advertise("map", 1);
+    //image_transport::ImageTransport it(rosNode);
+    //image_transport::Publisher occupancygrid_img_pub = it.advertise("map/image", 1);
 
     ROS_INFO("zoo_map_maker is ready. Waiting for footprints on /footprints + TF updates");
 
     ros::Rate loop_rate(5);
     while(rosNode.ok()){
 
-        Mat occupancygrid((int)(physicalMapHeight * meters2pixels),(int)(physicalMapWidth * meters2pixels),  CV_8UC1, 255);
+        Mat occupancygrid((int)(physicalMapHeight / RESOLUTION),(int)(physicalMapWidth / RESOLUTION),  CV_8UC1, 255);
+
+        nav_msgs::OccupancyGrid map;
+        map.header.frame_id = "/sandtray";
+        map.info.map_load_time = ros::Time::now();
+        map.info.resolution = RESOLUTION;
+        map.info.width = occupancygrid.size().width;
+        map.info.height = occupancygrid.size().height;
+        map.info.origin.position.y=-physicalMapHeight;
+
 
         for (auto const& kv : footprints) {
 
@@ -120,15 +130,24 @@ int main(int argc, char* argv[])
             for (const auto& p : kv.second) {
                 geometry_msgs::PointStamped base_point;
                 listener.transformPoint("/sandtray", p, base_point);
-                poly.push_back(cv::Point(base_point.point.x * meters2pixels, -base_point.point.y * meters2pixels));
+                poly.push_back(cv::Point(base_point.point.x / RESOLUTION, -base_point.point.y / RESOLUTION));
             }
 
-            fillConvexPoly(occupancygrid,poly,128);
+            fillConvexPoly(occupancygrid,poly,0);
     }
+        flip(occupancygrid, occupancygrid,0);
+        blur(occupancygrid, occupancygrid,Size(3,3));
 
         sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", occupancygrid).toImageMsg();
 
-        occupancygrid_pub.publish(msg);
+        vector<signed char> grid;
+        for(size_t i = 0; i < occupancygrid.total(); ++i) {
+            grid.push_back(100-occupancygrid.data[i]*100/255); // replace with a memcpy?
+        }
+        map.data = grid;
+
+        //occupancygrid_img_pub.publish(msg);
+        occupancygrid_pub.publish(map);
         ros::spinOnce();
         loop_rate.sleep();
     }
