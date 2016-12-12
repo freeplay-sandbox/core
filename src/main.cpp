@@ -25,48 +25,6 @@ const double RESOLUTION=0.01; // m per cell
 
 map<string, vector<geometry_msgs::PointStamped>> footprints;
 
-void process(const sensor_msgs::ImageConstPtr& rgb_msg,
-        const sensor_msgs::ImageConstPtr& depth_msg) {
-
-    auto rgb = cv_bridge::toCvShare(rgb_msg, "bgr8")->image; 
-    auto depth = cv_bridge::toCvShare(depth_msg)->image; 
-
-
-    //uint16_t *image_data = (uint16_t *) depth.data;
-
-    //float g_depth_avg;
-    //double depth_total = 0;
-    //int depth_count = 0;
-    //for (unsigned int i = 0; i < depth_msg->height * depth_msg->width; ++i)
-    //{
-    //    //if ((0 < *image_data) && (*image_data <= g_max_z))
-    //    if ((0 < *image_data))
-    //    {
-    //        depth_total += *image_data;
-    //        depth_count++;
-    //    }
-    //    image_data++;
-    //}
-    //if (depth_count != 0)
-    //{
-    //    g_depth_avg = static_cast<float>(depth_total / depth_count);
-    //}
-
-    //ROS_INFO_STREAM("Avg depth: " << g_depth_avg);
-
-    depth.convertTo(depth, CV_32F); // thresholding works on CV_8U or CV_32F but not CV_16U
-    imshow("Input depth", depth);
-    threshold(depth, depth, 0.5, 1.0, THRESH_BINARY_INV);
-    depth.convertTo(depth, CV_8U); // masking requires CV_8U. All non-zero values are kept, so '1.0' is fine
-
-    Mat maskedImage;
-    rgb.copyTo(maskedImage, depth);
-
-    //imshow("Input RGB", rgb);
-    imshow("Masked input", maskedImage);
-    waitKey(10);
-}
-
 void getFootprints(const visualization_msgs::MarkerArray& markers) {
 
     for (const auto& marker : markers.markers) {
