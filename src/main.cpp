@@ -60,17 +60,17 @@ void getFootprints(const visualization_msgs::MarkerArray& markers) {
 
 }
 
-typedef std::pair<uint8_t, uint8_t> Location;
+typedef std::pair<int, int> Location;
 
 inline double heuristic(Location a, Location b) {
-  uint8_t x1, y1, x2, y2;
+  int x1, y1, x2, y2;
   tie (x1, y1) = a;
   tie (x2, y2) = b;
   return abs(x1 - x2) + abs(y1 - y2);
 }
 
 inline uint8_t cost(const nav_msgs::OccupancyGrid map, Location a) {
-    uint8_t x, y;
+    int x, y;
     tie (x, y) = a;
 
     assert(x>=0 && y>=0 && x<map.info.width && y<map.info.height);
@@ -81,16 +81,14 @@ inline uint8_t cost(const nav_msgs::OccupancyGrid map, Location a) {
     return raw * 10;
 }
 
-inline Location onmap(double x, double y) {
+inline Location to_map(double x, double y) {
 
-    assert(x>=0 && y<=0);
-
-    return {(uint8_t)(x / RESOLUTION), (uint8_t)(-y / RESOLUTION)};
+    return {(int)(x / RESOLUTION), (int)(-y / RESOLUTION)};
 }
 
-inline std::pair<double, double> frommap(Location a) {
+inline std::pair<double, double> from_map(Location a) {
 
-    uint8_t x, y;
+    int x, y;
     tie (x, y) = a;
 
     return {x * RESOLUTION, -y * RESOLUTION};
@@ -118,7 +116,7 @@ struct PriorityQueue {
 
 std::vector<Location> neighbours(const nav_msgs::OccupancyGrid& map, Location p){
 
-    uint8_t width=map.info.width, height=map.info.height;
+    int width=(int)map.info.width, height=(int)map.info.height;
 
     vector<Location> nghbs;
 
@@ -192,8 +190,8 @@ std::vector<Location> astar(const nav_msgs::OccupancyGrid& map, Location start, 
 
 nav_msgs::Path plan(const nav_msgs::OccupancyGrid& map, const geometry_msgs::Point& start_point, const geometry_msgs::Point& goal_point) {
 
-    auto start = onmap(start_point.x, start_point.y);
-    auto goal = onmap(goal_point.x, goal_point.y);
+    auto start = to_map(start_point.x, start_point.y);
+    auto goal = to_map(goal_point.x, goal_point.y);
 
 
     nav_msgs::Path path;
@@ -205,7 +203,7 @@ nav_msgs::Path plan(const nav_msgs::OccupancyGrid& map, const geometry_msgs::Poi
     size_t i = 0;
     for (auto p : points) {
         double x, y;
-        tie (x, y) = frommap(p);
+        tie (x, y) = from_map(p);
         auto point = geometry_msgs::PoseStamped();
         point.pose.position.x = x;
         point.pose.position.y = y;
