@@ -1,5 +1,6 @@
 #include <string>
 #include <map>
+#include <utility> // for std::pair
 
 // opencv3
 #include <opencv2/core/core.hpp>
@@ -12,7 +13,10 @@
 #include <sensor_msgs/Image.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Point.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/Path.h>
 #include <cv_bridge/cv_bridge.h>
 
 using namespace std;
@@ -22,6 +26,10 @@ const double physicalMapWidth = 0.62; //m
 const double physicalMapHeight = 0.42; //m
 
 const double RESOLUTION=0.01; // m per cell
+
+const double delayBeforeExecuting = 0.5; // sec
+const double t0 = 1; //sec - extra time for the robot to get to the first point in traj
+const double dt = 0.1; //sec - seconds between points in traj
 
 map<string, vector<geometry_msgs::PointStamped>> footprints;
 
@@ -49,6 +57,88 @@ void getFootprints(const visualization_msgs::MarkerArray& markers) {
 
 }
 
+typedef std::pair<uint8_t, uint8_t> Location;
+
+inline double heuristic(Location a, Location b) {
+  uint8_t x1, y1, x2, y2;
+  tie (x1, y1) = a;
+  tie (x2, y2) = b;
+  return abs(x1 - x2) + abs(y1 - y2);
+}
+
+inline signed char cost(const nav_msgs::OccupancyGrid map, Location a) {
+    uint8_t x, y;
+    tie (x, y) = a;
+    return map.data[x * map.info.width + y];
+}
+
+inline Location onmap(double x, double y) {
+
+    assert(x>=0 && y<=0);
+
+    return {(uint8_t)(x / RESOLUTION), (uint8_t)(-y / RESOLUTION)};
+}
+
+inline std::pair<double, double> frommap(Location a) {
+
+    uint8_t x, y;
+    tie (x, y) = a;
+
+    return {x * RESOLUTION, -y * RESOLUTION};
+}
+
+
+std::vector<Location> astar(const nav_msgs::OccupancyGrid& map, Location start, Location goal) {
+    auto path = vector<Location>();
+
+    uint8_t x = start.first, y = start.second;
+
+    while(x != goal.first) {
+        start.first < goal.first ? x++ : x--;
+        path.push_back({x, start.second});
+    }
+
+    while(y != goal.second) {
+        start.second < goal.second ? y++ : y--;
+        path.push_back({goal.first, y});
+    }
+
+    cout << "Publishing path (" << path.size() << " points)" << endl;
+    return path;
+
+}
+
+nav_msgs::Path plan(const nav_msgs::OccupancyGrid& map, const geometry_msgs::Point& start_point, const geometry_msgs::Point& goal_point) {
+
+    auto start = onmap(start_point.x, start_point.y);
+    auto goal = onmap(goal_point.x, goal_point.y);
+
+
+    nav_msgs::Path path;
+    path.header.frame_id = "/sandtray";
+    path.header.stamp = ros::Time::now() + ros::Duration(delayBeforeExecuting);
+
+    auto points = astar(map, start, goal);
+
+    size_t i = 0;
+    for (auto p : points) {
+        double x, y;
+        tie (x, y) = frommap(p);
+        auto point = geometry_msgs::PoseStamped();
+        point.pose.position.x = x;
+        point.pose.position.y = y;
+        point.header.frame_id = "/sandtray";
+        point.header.stamp = ros::Time(t0 + i * dt);
+
+        path.poses.push_back(point);
+        
+        i++;
+
+    }
+
+    return path;
+}
+
 int main(int argc, char* argv[])
 {
     //ROS initialization
@@ -61,6 +151,7 @@ int main(int argc, char* argv[])
 
     ros::Subscriber footprints_sub = rosNode.subscribe("footprints", 10, getFootprints);
     ros::Publisher occupancygrid_pub = rosNode.advertise<nav_msgs::OccupancyGrid>("map", 1);
+    ros::Publisher path_pub = rosNode.advertise<nav_msgs::Path>("zoo_manipulation_path", 1);
 
     //image_transport::ImageTransport it(rosNode);
     //image_transport::Publisher occupancygrid_img_pub = it.advertise("map/image", 1);
@@ -68,6 +159,14 @@ int main(int argc, char* argv[])
     ROS_INFO("zoo_map_maker is ready. Waiting for footprints on /footprints + TF updates");
 
     ros::Rate loop_rate(5);
+    size_t counter = 1;
+
+    geometry_msgs::PointStamped zebraOrigin;
+    zebraOrigin.header.frame_id="/zebra";
+
+    geometry_msgs::PointStamped hippoOrigin;
+    hippoOrigin.header.frame_id="/hippo";
+
     while(rosNode.ok()){
 
         Mat occupancygrid((int)(physicalMapHeight / RESOLUTION),(int)(physicalMapWidth / RESOLUTION),  CV_8UC1, 255);
@@ -106,8 +205,19 @@ int main(int argc, char* argv[])
 
         //occupancygrid_img_pub.publish(msg);
         occupancygrid_pub.publish(map);
+
+        if (counter % 25  == 0){
+            geometry_msgs::PointStamped start_point;
+            geometry_msgs::PointStamped goal_point;
+            listener.transformPoint("/sandtray", zebraOrigin, start_point);
+            listener.transformPoint("/sandtray", hippoOrigin, goal_point);
+            path_pub.publish(plan(map, start_point.point, goal_point.point));
+        }
+            
         ros::spinOnce();
         loop_rate.sleep();
+
+        counter++;
     }
 
     return 0;
