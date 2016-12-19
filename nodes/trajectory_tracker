@@ -1,0 +1,85 @@
+#! /usr/bin/env python
+
+import rospy
+
+import actionlib
+import tf
+
+from geometry_msgs.msg import PoseStamped
+
+import zoo_map_maker.msg
+import zoo_map_maker.srv
+
+tl = None
+
+PLAN_SERVICE="plan_motion"
+
+class ZooTrajTrackerAction(object):
+    # create messages that are used to publish feedback/result
+    _feedback = zoo_map_maker.msg.ZooNavigationFeedback()
+    _result = zoo_map_maker.msg.ZooNavigationResult()
+
+    def __init__(self, name):
+        self._action_name = name
+        self._as = actionlib.SimpleActionServer(self._action_name, zoo_map_maker.msg.ZooNavigationAction, execute_cb=self.execute_cb, auto_start = False)
+        self._as.start()
+
+    def execute_cb(self, goal):
+        # helper variables
+        r = rospy.Rate(5)
+        success = True
+
+        # publish info to the console for the user
+        rospy.loginfo('%s: Received a request to move %s to %.2f, %.2f. Let\'s do that' % (self._action_name, goal.item, goal.goal.x, goal.goal.y))
+
+        goalRef = PoseStamped()
+        goalRef.header.frame_id = "/sandtray"
+        goalRef.pose.position.x = goal.goal.x
+        goalRef.pose.position.y = goal.goal.y
+
+        goalInTargetFrame =  tl.transformPose(goal.item, goalRef)
+        rospy.loginfo("Moving %s to %.2f,%.2f" % (goalInTargetFrame.header.frame_id, goalInTargetFrame.pose.position.x, goalInTargetFrame.pose.position.y))
+
+        rospy.loginfo("Requesting a plan...")
+        path=None
+        try:
+            plan = rospy.ServiceProxy(PLAN_SERVICE, zoo_map_maker.srv.ZooPlan)
+            path = plan(goalInTargetFrame).path
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
+            self._as.set_aborted()
+            success = False
+            return
+
+        rospy.loginfo("Got it a plan!")
+
+        # start executing the action
+        for i, pose in enumerate(path.poses):
+            # check that preempt has not been requested by the client
+            if self._as.is_preempt_requested():
+                rospy.loginfo('%s: Preempted' % self._action_name)
+                self._as.set_preempted()
+                success = False
+                break
+            # publish the feedback
+            self._feedback.percentage = i*100./len(path.poses)
+            rospy.loginfo("Done %i percent. Now at (%.2f, %.2f)" % (self._feedback.percentage, 
+                                                pose.pose.position.x, pose.pose.position.y))
+            self._as.publish_feedback(self._feedback)
+
+            # this step is not necessary, the sequence is computed at 1 Hz for demonstration purposes
+            r.sleep()
+
+        if success:
+            rospy.loginfo('%s: Succeeded' % self._action_name)
+            self._as.set_succeeded(self._result)
+
+if __name__ == '__main__':
+    rospy.init_node('zoo_trajectory_tracker')
+
+    rospy.wait_for_service(PLAN_SERVICE)
+
+    tl = tf.TransformListener()
+
+    server = ZooTrajTrackerAction(rospy.get_name())
+    rospy.spin()

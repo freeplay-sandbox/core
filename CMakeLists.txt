@@ -98,6 +98,9 @@ install(FILES
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
+catkin_install_python(PROGRAMS nodes/trajectory_tracker
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
 #install(FILES
 #    config/markers_configuration_sample.yml
 #    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config

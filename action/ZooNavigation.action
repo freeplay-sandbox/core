@@ -1,0 +1,10 @@
+#goal definition
+
+# name of the item to move
+string item
+# goal position, in the reference frame of the sandtray (and in meters)
+geometry_msgs/Point goal
+---
+---
+#feedback
+int32 percentage
