@@ -22,6 +22,8 @@
 #include <nav_msgs/Path.h>
 #include <cv_bridge/cv_bridge.h>
 
+#include <zoo_map_maker/ZooPlan.h>
+
 using namespace std;
 using namespace cv;
 
@@ -53,7 +55,8 @@ public:
                 footprints_sub(_nh->subscribe("footprints", 10, &ZooMapMaker::getFootprints, this)),
                 path_pub(_nh->advertise<nav_msgs::Path>("zoo_manipulation_path", 1)),
                 occupancygrid_pub(_nh->advertise<nav_msgs::OccupancyGrid>("map", 1)),
-                goal_sub(_nh->subscribe("goal", 10, &ZooMapMaker::onGoal, this))
+                goal_sub(_nh->subscribe("goal", 10, &ZooMapMaker::onGoal, this)),
+                service(_nh->advertiseService("plan_motion", &ZooMapMaker::planService, this))
     {
 
     }
@@ -198,6 +201,20 @@ public:
         // plan and publish
         path_pub.publish(plan(*goal));
 
+    }
+
+    bool planService(zoo_map_maker::ZooPlan::Request& req,
+                    zoo_map_maker::ZooPlan::Response& res)
+    {
+        ROS_INFO_STREAM("Got a planning request for " << req.goal.header.frame_id);
+        ROS_INFO("Updating occupancy map...");
+        updateOccupancyGrid(req.goal.header.frame_id);
+        ROS_INFO("Planing...");
+        auto p = plan(req.goal);
+        res.path = p;
+        path_pub.publish(p);
+        ROS_INFO("Done!");
+        return true;
     }
 
     void publishOccupancy()
@@ -353,6 +370,8 @@ private:
     ros::Publisher occupancygrid_pub;
     ros::Publisher path_pub;
     ros::Subscriber goal_sub;
+
+    ros::ServiceServer service;
 
     tf::TransformListener listener;
 };

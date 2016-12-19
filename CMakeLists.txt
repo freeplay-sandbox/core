@@ -5,6 +5,7 @@ project(zoo_map_maker)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS 
+        actionlib_msgs
         roscpp 
         tf 
         cv_bridge 
@@ -22,6 +23,22 @@ if(2.9.0 VERSION_GREATER ${OpenCV_VERSION})
     message(FATAL "OpenCV3 required!")
 endif()
 
+
+add_action_files(
+    DIRECTORY action
+    FILES ZooNavigation.action
+)
+
+add_service_files(
+    DIRECTORY srv
+    FILES
+    ZooPlan.srv
+)
+
+generate_messages(
+    DEPENDENCIES actionlib_msgs geometry_msgs nav_msgs
+)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -36,6 +53,7 @@ catkin_package(
   CATKIN_DEPENDS 
     tf
     nodelet
+    actionlib_msgs
   DEPENDS OpenCV
   LIBRARIES 
 )
