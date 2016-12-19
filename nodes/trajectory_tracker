@@ -6,6 +6,7 @@ import actionlib
 import tf
 
 from geometry_msgs.msg import PoseStamped
+from visualization_msgs.msg import Marker
 
 import zoo_map_maker.msg
 import zoo_map_maker.srv
@@ -13,6 +14,27 @@ import zoo_map_maker.srv
 tl = None
 
 PLAN_SERVICE="plan_motion"
+
+def visualize_traj(points):
+
+    traj = Marker()
+    traj.header.frame_id = REFERENCE_FRAME
+    traj.header.stamp = rospy.get_rostime()
+    traj.ns = "writing_traj"
+    traj.action = Marker.ADD
+    traj.pose.orientation.w = 1.0
+    traj.type = Marker.LINE_STRIP
+    traj.scale.x = 0.01 # line width
+    traj.color.r = 1.0
+    traj.color.b = 0.0
+    traj.color.a = 1.0
+    
+    traj.id = 0; #overwrite any existing shapes
+    traj.lifetime.secs = 1; #timeout for display
+    
+    traj.points = list(points)
+    
+    pub_markers.publish(traj)
 
 class ZooTrajTrackerAction(object):
     # create messages that are used to publish feedback/result
@@ -33,7 +55,7 @@ class ZooTrajTrackerAction(object):
         rospy.loginfo('%s: Received a request to move %s to %.2f, %.2f. Let\'s do that' % (self._action_name, goal.item, goal.goal.x, goal.goal.y))
 
         goalRef = PoseStamped()
-        goalRef.header.frame_id = "/sandtray"
+        goalRef.header.frame_id = REFERENCE_FRAME
         goalRef.pose.position.x = goal.goal.x
         goalRef.pose.position.y = goal.goal.y
 
@@ -51,10 +73,37 @@ class ZooTrajTrackerAction(object):
             success = False
             return
 
-        rospy.loginfo("Got it a plan!")
 
-        # start executing the action
-        for i, pose in enumerate(path.poses):
+        success = self.play_traj(path)
+
+        if success:
+            rospy.loginfo('%s: Succeeded' % self._action_name)
+            self._as.set_succeeded(self._result)
+
+    def play_traj(self,requested_traj):
+
+        written_points = []
+
+        rospy.loginfo("Received trajectory! As requested, waiting " + str((requested_traj.header.stamp-rospy.Time.now()).to_sec()) + "s before starting...")
+
+        #wait until time instructed to start executing
+        rospy.sleep(requested_traj.header.stamp-rospy.Time.now());
+
+        rospy.loginfo("Waiting a bit more (" + str(requested_traj.poses[0].header.stamp.to_sec()) + "s) to give the robot time to prepare...")
+        #wait for robot to get to starting point
+        rospy.sleep(requested_traj.poses[0].header.stamp.to_sec()); 
+
+
+        rospy.loginfo("Starting to play trajectory!")
+
+        #add points to the display one at a time, like an animation
+        for i in range(len(requested_traj.poses)-1): 
+            p = requested_traj.poses[i].pose.position;
+            pub_poses.publish(requested_traj.poses[i])
+            written_points.append(p)
+            visualize_traj(written_points)
+            duration = requested_traj.poses[i+1].header.stamp - requested_traj.poses[i].header.stamp;
+
             # check that preempt has not been requested by the client
             if self._as.is_preempt_requested():
                 rospy.loginfo('%s: Preempted' % self._action_name)
@@ -62,24 +111,38 @@ class ZooTrajTrackerAction(object):
                 success = False
                 break
             # publish the feedback
-            self._feedback.percentage = i*100./len(path.poses)
-            rospy.loginfo("Done %i percent. Now at (%.2f, %.2f)" % (self._feedback.percentage, 
-                                                pose.pose.position.x, pose.pose.position.y))
+            self._feedback.percentage = i*100./len(requested_traj.poses)
+            rospy.loginfo("Done %i%%" % self._feedback.percentage)
             self._as.publish_feedback(self._feedback)
 
-            # this step is not necessary, the sequence is computed at 1 Hz for demonstration purposes
-            r.sleep()
+            rospy.sleep(duration); #wait until it's time to show the next point
 
-        if success:
-            rospy.loginfo('%s: Succeeded' % self._action_name)
-            self._as.set_succeeded(self._result)
+        self._feedback.percentage = 100
+        self._as.publish_feedback(self._feedback)
+
+        #show final point (no sleep afterwards, but it may have a "lifetime" set 
+        #in visualize_traj)    
+        p = requested_traj.poses[len(requested_traj.poses)-1].pose.position;
+        pub_poses.publish(requested_traj.poses[len(requested_traj.poses)-1])
+        written_points.append(p)
+        visualize_traj(written_points)
+
+        return True
+
 
 if __name__ == '__main__':
     rospy.init_node('zoo_trajectory_tracker')
 
+    MARKER_TOPIC = rospy.get_param('~visualization_output_topic','visualization_markers')
+    POSES_TOPIC = rospy.get_param('~poses_output_topic','poses')
+    REFERENCE_FRAME = rospy.get_param('~frame_id','sandtray') 
+
     rospy.wait_for_service(PLAN_SERVICE)
 
     tl = tf.TransformListener()
+
+    pub_markers = rospy.Publisher(MARKER_TOPIC, Marker, queue_size=5);
+    pub_poses = rospy.Publisher(POSES_TOPIC, PoseStamped, queue_size=5);
 
     server = ZooTrajTrackerAction(rospy.get_name())
     rospy.spin()
