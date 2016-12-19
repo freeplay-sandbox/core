@@ -25,8 +25,8 @@
 using namespace std;
 using namespace cv;
 
-const double physicalMapWidth = 0.62; //m
-const double physicalMapHeight = 0.42; //m
+const double physicalMapWidth = 0.6; //m
+const double physicalMapHeight = 0.335; //m
 
 const double RESOLUTION=0.005; // m per cell
 
