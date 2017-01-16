@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
         visualization_msgs
         nav_msgs
         image_geometry 
+        chilitags_catkin
         nodelet)
 
 ## System dependencies
@@ -80,12 +81,19 @@ target_link_libraries(playground_map_and_plan ${LIBS})
 #add_dependencies(markers_nodelet ${catkin_EXPORTED_TARGETS})
 #target_link_libraries(markers_nodelet ${LIBS})
 
+add_executable(sandtray_localisation 
+    src/sandtray_localisation/chilitagsdetector.cpp 
+    src/sandtray_localisation/sandtray_localisation.cpp)
+target_link_libraries(sandtray_localisation ${LIBS})
+
 
 #############
 ## Install ##
 #############
 
-install(TARGETS playground_map_and_plan
+install(TARGETS
+    playground_map_and_plan
+    sandtray_localisation
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

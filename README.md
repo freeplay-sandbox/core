@@ -25,8 +25,8 @@ As usual:
 > make install
 ```
 
-Usage
------
+Basic usage
+-----------
 
 To get the robot to play and build/arrange the playground by itself:
 
@@ -40,7 +40,7 @@ To get the robot to play and build/arrange the playground by itself:
 Nodes documentation
 -------------------
 
-The repository currently contains 3 nodes: `playground_map_and_plan`,
+The repository currently contains 3 main nodes: `playground_map_and_plan`,
 `move_playground_items` and `play`.
 
 ### playground_map_and_plan
@@ -78,3 +78,30 @@ at each step,
 
 Animals and blocks are picked up only if they are in (virtual) arm reach, and
 the closest animals/blocks are always prefered.
+
+
+### Secondary nodes
+
+#### sandtray_localisation
+
+This node waits for a signal and then continuously publishes a static
+transformation between a reference point in the robot and a fiducial marker
+visible in the environment (typically, on the interaction playground).
+
+When running, this nodes listen on a special topic (by default,
+`/sandtray_localising`) for a signal (ie, an empty message). Upon reception of
+the signal, it attempts to detect a specific fiducial marker (by default,
+chilitags '709', can be set with `_marker_id:=...`) of a specific size (by
+default 400mm, can be set with `_marker_size:=...`). If the marker is found
+within 5 seconds, the node starts to publish a static transform between frames
+`_target_frame` (by default, `sandtray`) and `_reference_frame` (by default,
+`odom`).
+
+Note that a transform must exist between the reference frame and the frame of
+the `_image` topic!
+
+Everytime a new signal is received, the transform is updated.
+
+**Pre-requisite**: [ros_markers](https://github.com/chili-epfl/ros_markers) (the
+ROS wrapper for the chilitags library)
+
