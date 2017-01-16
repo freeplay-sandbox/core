@@ -29,7 +29,7 @@ def visualize_traj(points):
     traj = Marker()
     traj.header.frame_id = REFERENCE_FRAME
     traj.header.stamp = rospy.get_rostime()
-    traj.ns = "writing_traj"
+    traj.ns = "item_motion_traj"
     traj.action = Marker.ADD
     traj.pose.orientation.w = 1.0
     traj.type = Marker.LINE_STRIP
