@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(zoo_map_maker)
+project(playground_builder)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -26,13 +26,13 @@ endif()
 
 add_action_files(
     DIRECTORY action
-    FILES ZooNavigation.action
+    FILES PlaygroundNavigation.action
 )
 
 add_service_files(
     DIRECTORY srv
     FILES
-    ZooPlan.srv
+    PlaygroundPlan.srv
 )
 
 generate_messages(
@@ -73,8 +73,8 @@ set(LIBS
     )
 
 
-add_executable(run src/main.cpp)
-target_link_libraries(run ${LIBS})
+add_executable(playground_map_and_plan src/main.cpp)
+target_link_libraries(playground_map_and_plan ${LIBS})
 
 #add_library(markers_nodelet src/chilitagsdetector.cpp src/nodelet.cpp)
 #add_dependencies(markers_nodelet ${catkin_EXPORTED_TARGETS})
@@ -85,20 +85,22 @@ target_link_libraries(run ${LIBS})
 ## Install ##
 #############
 
-install(TARGETS run
+install(TARGETS playground_map_and_plan
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(FILES
-    launch/run.launch
+    launch/play.launch
     launch/run_gscam.launch
 #    launch/gscam_nodelet_pipeline.launch
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-catkin_install_python(PROGRAMS nodes/trajectory_tracker
+catkin_install_python(PROGRAMS
+    nodes/move_playground_items
+    nodes/play
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 #install(FILES

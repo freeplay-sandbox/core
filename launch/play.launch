@@ -1,0 +1,10 @@
+<launch>
+
+  <node pkg="playground_builder" type="playground_map_and_plan" name="map_and_plan" output="screen">
+  </node>
+  <node pkg="playground_builder" type="move_playground_items" name="move_playground_items" output="screen">
+  </node>
+  <node pkg="playground_builder" type="play" name="playground_play" output="screen">
+  </node>
+
+</launch>

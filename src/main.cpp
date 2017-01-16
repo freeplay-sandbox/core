@@ -22,7 +22,7 @@
 #include <nav_msgs/Path.h>
 #include <cv_bridge/cv_bridge.h>
 
-#include <zoo_map_maker/ZooPlan.h>
+#include <playground_builder/PlaygroundPlan.h>
 
 using namespace std;
 using namespace cv;
@@ -46,17 +46,17 @@ bool endsWith(const std::string& fullString, const std::string& ending) {
     }
 }
 
-class ZooMapMaker {
+class PlaygroundMapMaker {
 
 public:
 
-    ZooMapMaker(std::shared_ptr<ros::NodeHandle> nh):
+    PlaygroundMapMaker(std::shared_ptr<ros::NodeHandle> nh):
                 _nh(nh),
-                footprints_sub(_nh->subscribe("footprints", 10, &ZooMapMaker::getFootprints, this)),
-                path_pub(_nh->advertise<nav_msgs::Path>("zoo_manipulation_path", 1)),
+                footprints_sub(_nh->subscribe("footprints", 10, &PlaygroundMapMaker::getFootprints, this)),
+                path_pub(_nh->advertise<nav_msgs::Path>("playground_manipulation_path", 1)),
                 occupancygrid_pub(_nh->advertise<nav_msgs::OccupancyGrid>("map", 1)),
-                goal_sub(_nh->subscribe("goal", 10, &ZooMapMaker::onGoal, this)),
-                service(_nh->advertiseService("plan_motion", &ZooMapMaker::planService, this))
+                goal_sub(_nh->subscribe("goal", 10, &PlaygroundMapMaker::onGoal, this)),
+                service(_nh->advertiseService("plan_motion", &PlaygroundMapMaker::planService, this))
     {
 
     }
@@ -203,8 +203,8 @@ public:
 
     }
 
-    bool planService(zoo_map_maker::ZooPlan::Request& req,
-                    zoo_map_maker::ZooPlan::Response& res)
+    bool planService(playground_builder::PlaygroundPlan::Request& req,
+                    playground_builder::PlaygroundPlan::Response& res)
     {
         ROS_INFO_STREAM("Got a planning request for " << req.goal.header.frame_id);
         ROS_INFO("Updating occupancy map...");
@@ -379,13 +379,13 @@ private:
 int main(int argc, char* argv[])
 {
     //ROS initialization
-    ros::init(argc, argv, "zoo_map_maker");
+    ros::init(argc, argv, "playground_map_and_plan");
     auto nh = make_shared<ros::NodeHandle>();
     ros::NodeHandle _private_node("~");
 
-    ZooMapMaker mapmaker(nh);
+    PlaygroundMapMaker mapmaker(nh);
 
-    ROS_INFO("zoo_map_maker is ready. Waiting for footprints on /footprints + TF updates");
+    ROS_INFO("playground_map_and_plan is ready. Waiting for footprints on /footprints + TF updates");
 
     ros::Rate loop_rate(5);
     while(nh->ok()){

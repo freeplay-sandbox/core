@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>zoo_map_maker</name>
+  <name>playground_builder</name>
   <version>0.1.0</version>
-  <description>Generates a 2D occupancy map for the Zoo Builder experiment</description>
+  <description>Get a robot to play the Playground Builder experiment</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
