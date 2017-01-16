@@ -1,10 +1,60 @@
 <launch>
 
-  <node pkg="playground_builder" type="playground_map_and_plan" name="map_and_plan" output="screen">
-  </node>
-  <node pkg="playground_builder" type="move_playground_items" name="move_playground_items" output="screen">
-  </node>
-  <node pkg="playground_builder" type="play" name="playground_play" output="screen">
-  </node>
+    <arg name="with_attention"      default="false" />
+    <arg name="with_robot"          default="false" />
+    <arg name="with_marker_localisation"          default="$(arg with_attention)" />
+    <arg name="nao_ip"              default="$(optenv NAO_IP 127.0.0.1)" />
+    <arg name="nao_port"            default="$(optenv NAO_PORT 9559)" />
+
+    <arg name="roscore_ip"          default="127.0.0.1" />
+    <arg name="network_interface"   default="eth0" />
+
+    <group if="$(arg with_robot)">
+        <!-- naoqi driver -->
+        <include file="$(find naoqi_driver)/launch/naoqi_driver.launch" >
+            <arg name="nao_ip"            value="$(arg nao_ip)" />
+            <arg name="nao_port"          value="$(arg nao_port)" />
+            <arg name="roscore_ip"        value="$(arg roscore_ip)" />
+            <arg name="network_interface" value="$(arg network_interface)" />
+        </include>
+
+        <node pkg="playground_builder" type="nao_playground_behaviours" name="nao_behaviours">
+            <param name="nao_ip"            value="$(arg nao_ip)" />
+        </node>
+    </group>
+
+    <!-- Sets the image source. -->
+    <arg name="image" if="$(arg with_robot)" default="/naoqi_driver_node/camera/front/image_raw" />
+    <!-- Sets the image source. -->
+    <arg name="image" unless="$(arg with_robot)" default="/v4l/camera/image_raw" />
+
+    <group if="$(arg with_attention)">
+
+        <group unless="$(arg with_robot)">
+            <arg name="camera_device" default="/dev/video0" /> <!-- only used if using external camera -->
+            <!-- Start the GSCAM camera driver -->
+            <include file="$(find gscam)/v4l.launch" >
+                <arg name="DEVICE" value="$(arg camera_device)"/>
+            </include>
+        </group>
+        <node pkg="gazr" type="estimate" name="gazr">
+            <param name="face_model" value="$(find gazr)/shape_predictor_68_face_landmarks.dat" />
+            <remap from="/image" to="$(arg image)"/>
+        </node>
+    </group>
+
+    <group if="$(arg with_marker_localisation)">
+        <node pkg="playground_builder" type="sandtray_localisation" name="sandtray_localisation">
+            <remap from="/image" to="$(arg image)" />
+        </node>
+    </group>
+
+
+    <node pkg="playground_builder" type="playground_map_and_plan" name="map_and_plan">
+    </node>
+    <node pkg="playground_builder" type="move_playground_items" name="move_playground_items">
+    </node>
+    <node pkg="playground_builder" type="play" name="playground_play" output="screen">
+    </node>
 
 </launch>
