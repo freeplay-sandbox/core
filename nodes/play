@@ -162,6 +162,9 @@ def isin(point,polygon):
     Copied from: http://www.ariel.com.au/a/python-point-int-poly.html
     """
 
+    if point is None:
+        return False
+
     x,y = point
     n = len(polygon)
     inside =False
@@ -244,11 +247,13 @@ def place_random_animal():
 
     for animal in animals:
 
-        x,y = get_pose(animal)
+        pose = get_pose(animal)
+        if pose is None: # frame not published yet!
+            continue
         #rospy.loginfo("%s is at (%.2f,%.2f)" % (animal,x,y))
 
-        # animal out of reach	
-        if distance_to_robot((x,y)) > ARM_REACH:
+        # animal out of reach
+        if distance_to_robot(pose) > ARM_REACH:
             continue
 
         zone = HABITATS[animal]
@@ -259,13 +264,13 @@ def place_random_animal():
             continue
 
     
-        if not isin((x,y), ZONES[zone]):
+        if not isin(pose, ZONES[zone]):
             rospy.loginfo("Sending %s to %s" % (animal, zone))
             goal = playground_builder.msg.PlaygroundNavigationGoal(item=animal,goal=target)
             motion.send_goal(goal)
             motion.wait_for_result()
     
-            return True, (x,y)
+            return True, pose
 
     return False, None
 
