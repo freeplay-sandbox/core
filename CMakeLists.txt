@@ -86,6 +86,8 @@ add_executable(sandtray_localisation
     src/sandtray_localisation/sandtray_localisation.cpp)
 target_link_libraries(sandtray_localisation ${LIBS})
 
+add_executable(estimate_focus src/estimate_focus.cpp)
+target_link_libraries(estimate_focus ${LIBS})
 
 #############
 ## Install ##
@@ -94,6 +96,7 @@ target_link_libraries(sandtray_localisation ${LIBS})
 install(TARGETS
     playground_map_and_plan
     sandtray_localisation
+    estimate_focus
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

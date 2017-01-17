@@ -51,6 +51,7 @@
         </node>
 
         <node name="sandtray_gaze_viz" pkg="playground_builder" type="sandtray_gaze_viz" />
+        <node name="estimate_focus" pkg="playground_builder" type="estimate_focus" />
     </group>
 
     <group if="$(arg with_marker_localisation)">
