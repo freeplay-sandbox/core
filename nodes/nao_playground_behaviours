@@ -1,0 +1,176 @@
+#!/usr/bin/env python
+"""
+Listens for a trajectory to write and sends it to the nao via naoqi SDK.
+
+Requires a running robot/simulation with ALNetwork proxies.
+
+"""
+from copy import deepcopy
+from naoqi import ALModule, ALBroker, ALProxy
+from geometry_msgs.msg import PoseStamped
+from nav_msgs.msg import Path
+import rospy
+import tf
+import motion
+import numpy
+
+# masks for which axes naoqi is to control with its planning
+axisMask=motion.AXIS_MASK_VEL
+#axisMask=motion.AXIS_MASK_ALL
+
+tl = None
+
+def clip(v, vmin, vmax):
+    return max(min(v, vmax), vmin)
+
+
+def xyz2pantilt(pose, headframe="/Head"):
+    """
+    Convert a xyz target to pan and tilt angles for the head.
+
+    :param headframe: the frame of the head
+    :returns: (pan, tilt) in radians
+    """
+    #tl.waitForTransform(headframe,pose.header.frame_id, rospy.Time.now(), rospy.Duration(1.0))
+    pose.header.stamp = tl.getLatestCommonTime(pose.header.frame_id, headframe)
+    pose = tl.transformPose(headframe, pose)
+    pan = numpy.arctan2(pose.pose.position.y, pose.pose.position.x)
+    tilt = numpy.arctan2(pose.pose.position.z, pose.pose.position.x)
+    
+    rospy.loginfo("Computed head pan: %s, tilt: %s" % (pan, tilt))
+    return (pan,tilt)
+
+def look_at(pose):
+    yaw, pitch = xyz2pantilt(pose)
+    yaw = clip(yaw, -2.0857, 2.0857)
+    pitch = clip(-pitch, -0.6720, 0.5149) #beware the '-pitch'!
+    joints = ['HeadYaw','HeadPitch']
+    motionProxy.angleInterpolationWithSpeed(joints, [yaw, pitch], 0.1)
+
+def point_at(targetpose):
+    targetpose.header.stamp = tl.getLatestCommonTime(targetpose.header.frame_id, "base_footprint")
+    targetpose.pose.position.z += 0.1 # points 10cm above sandtray
+    pose = tl.transformPose("base_footprint", targetpose)
+    motionProxy.wbSetEffectorControl(effector, [pose.pose.position.x, pose.pose.position.y, pose.pose.position.z])
+
+def on_traj(traj):
+    global tl
+
+    rospy.loginfo("got traj at "+str(rospy.Time.now())) 
+    if(hasFallen == False): #no harm in executing trajectory
+        #if(effector == "LArm"):
+        #    motionProxy.openHand("LHand");
+        #    roll = -1.7; #rotate wrist to the left (about the x axis, w.r.t. robot frame)
+        #else:
+        #    motionProxy.openHand("RHand");
+        #    roll = 1.7; #rotate wrist to the right (about the x axis, w.r.t. robot frame)
+
+        target = PoseStamped()
+
+        target_frame = traj.header.frame_id
+        target.header.frame_id = target_frame
+        
+        point_at(traj.poses[0])
+        look_at(traj.poses[0])
+	rospy.sleep(3)
+        point_at(traj.poses[-1])
+        look_at(traj.poses[-1])
+
+#        path = []; times = [];
+#        for trajp in [traj.poses[0], traj.poses[-1]]:
+#
+#        
+#            trajp.pose.position.z = 0.0
+#
+#            #print(trajp.pose.position)
+#            #print("-")
+#
+#            target.pose.position = deepcopy(trajp.pose.position)
+#            #target.pose.orientation = deepcopy(trajp.pose.orientation)
+#            target_robot = tl.transformPose("/base_footprint",target)
+#
+#            #print(target_robot.pose.position)
+#            #print("---")
+#
+#            point = [target_robot.pose.position.x,target_robot.pose.position.y,target_robot.pose.position.z,roll,0,0]#roll,pitch,yaw];
+#            path.append(point);
+#            times.append(trajp.header.stamp.to_sec() )#- timeToStartPosition);
+#        
+#        #wait until time instructed to start executing
+#        rospy.sleep(traj.header.stamp-rospy.Time.now())#+rospy.Duration(timeToStartPosition));
+#        rospy.loginfo("Executing traj at "+str(rospy.Time.now().to_sec()) + ". Traj: " + str(path) + " (from footprint)") ;
+#        rospy.loginfo("Duration requested for this motion: "+str(times));
+#        startTime = rospy.Time.now();
+#
+#        motionProxy.positionInterpolations([effector],[motion.FRAME_ROBOT],[path],[axisMask],[times]);
+#        rospy.loginfo("Actual motion duration: "+str((rospy.Time.now()-startTime).to_sec()));
+
+    else:
+        rospy.loginfo("Got traj but not allowed to execute it because I've fallen");
+
+class FallResponder(ALModule):
+  """ Module to react to robotHasFallen events """
+  
+  def __init__(self, name, motionProxy, memoryProxy):
+      ALModule.__init__(self, name)
+      self.motionProxy = motionProxy;
+      memoryProxy.subscribeToEvent("robotHasFallen",name,self.has_fallen.__name__);
+      rospy.loginfo("Subscribed to robotHasFallen event");
+  def has_fallen(self, *_args):
+      global hasFallen
+      hasFallen = True;
+      self.motionProxy.killAll();
+      rospy.loginfo("Stopped task");
+      
+if __name__ == "__main__":
+    rospy.init_node("nao_playground_behaviours");
+    
+    TRAJ_TOPIC = rospy.get_param('~trajectory_input_topic','/playground_manipulation_path')    
+    NAO_IP = rospy.get_param('~nao_ip','127.0.0.1'); #default behaviour is 
+                                        #to connect to simulator locally
+    NAO_HANDEDNESS = rospy.get_param('~nao_handedness','right')
+    if(NAO_HANDEDNESS.lower()=='right'):
+        effector   = "RArm"
+    elif(NAO_HANDEDNESS.lower()=='left'):
+        effector = "LArm"
+    else: 
+        rospy.logerr('error in handedness param')
+
+    tl = tf.TransformListener()
+    while not tl.frameExists("/base_footprint"):
+        rospy.logwarn("Waiting for frame /base_footprint to be published...")
+        rospy.sleep(0.5)
+
+
+    # We need this broker to be able to construct
+    # NAOqi modules and subscribe to other modules
+    # The broker must stay alive until the program exists
+    port = 9559;
+    myBroker = ALBroker("myBroker", #I'm not sure that pyrobots doesn't already have one of these open called NAOqi?
+        "0.0.0.0",   # listen to anyone
+        0,           # find a free port and use it
+        NAO_IP,      # parent broker IP
+        port)        # parent broker port
+    hasFallen = False;
+    motionProxy = ALProxy("ALMotion", NAO_IP, port);
+    memoryProxy = ALProxy("ALMemory", NAO_IP, port);
+    postureProxy = ALProxy("ALRobotPosture", NAO_IP, port)
+    fallResponder = FallResponder("fallResponder",motionProxy,memoryProxy);
+    
+    motionProxy.wbEnableEffectorControl(effector,False); #if robot has fallen it will have a hard time getting up if the effector is still trying to be kept in a particular position
+    motionProxy.wakeUp()
+    postureProxy.goToPosture("StandInit", 0.5)
+
+
+    motionProxy.wbEnableEffectorControl(effector,True);
+    rospy.sleep(2)
+
+    pub_traj = rospy.Subscriber(TRAJ_TOPIC, Path, on_traj)
+
+    while not rospy.is_shutdown():
+        rospy.sleep(0.1)
+
+
+    motionProxy.rest()
+
+    myBroker.shutdown()
