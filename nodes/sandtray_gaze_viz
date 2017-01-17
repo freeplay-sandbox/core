@@ -1,0 +1,136 @@
+#!/usr/bin/env python
+
+import rospy
+import tf2_ros
+import geometry_msgs.msg
+import numpy as np
+
+import transformations
+
+import collections
+import time
+
+# simple ring buffer for temporal filtering of the gaze position
+gaze_buffer = collections.deque(maxlen=5)
+
+REF_FRAME = "sandtray"
+FRAME = "face_0"
+
+GAZE_POSE_TOPIC="/gazepose_on_sandtray"
+
+br = tf2_ros.TransformBroadcaster()
+
+def _xyz_to_mat44(pos):
+    return transformations.translation_matrix((pos.x, pos.y, pos.z))
+
+def _xyzw_to_mat44(ori):
+    return transformations.quaternion_matrix((ori.x, ori.y, ori.z, ori.w))
+
+def to_mat4(trans):
+    M = np.dot(_xyz_to_mat44(trans.transform.translation),
+               _xyzw_to_mat44(trans.transform.rotation))
+    return M
+
+
+def normalize(vec):
+    norm=np.linalg.norm(vec)
+    if norm==0: 
+        return vec
+    return vec/norm
+
+def bridge():
+
+    rospy.init_node('gaze_sandtray_viz', anonymous=True)
+
+    tfBuffer = tf2_ros.Buffer()
+    listener = tf2_ros.TransformListener(tfBuffer)
+
+    posepub = rospy.Publisher(GAZE_POSE_TOPIC, geometry_msgs.msg.PoseStamped, queue_size=1)
+
+    rate = rospy.Rate(10.0)
+
+    while not rospy.is_shutdown():
+        try:
+            trans = tfBuffer.lookup_transform(REF_FRAME, FRAME, rospy.Time())
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            rate.sleep()
+            continue
+
+
+        # from now on, everything takes place in the REF_FRAME reference frame
+
+        matrix = to_mat4(trans)
+
+        gaze_origin = np.array((trans.transform.translation.x, \
+                                trans.transform.translation.y, \
+                                trans.transform.translation.z))
+
+        gaze_vector = np.dot(matrix,[1,0,0,1])
+        gaze_vector = (gaze_vector / gaze_vector[3])[:3] - gaze_origin
+        gaze_vector = normalize(gaze_vector)
+
+        plane_normal = normalize(np.array((0,0,1)))
+        distance_plane_to_origin = 0
+
+        t = - (np.dot(gaze_origin, plane_normal) + distance_plane_to_origin) / (np.dot(gaze_vector, plane_normal))
+
+        gaze_projection = gaze_origin + gaze_vector * t
+
+#        print("Origin: " + str(gaze_origin))
+#        print("Gaze vec: " + str(gaze_vector))
+#        print("Intersection param: " + str(t))
+#        print("Resulting proj:" + str(gaze_projection))
+
+        #set_gaze(-gaze_projection[0]*1000,gaze_projection[1]*1000)
+
+        gaze_buffer.append(gaze_projection[:2])
+
+        gaze = sum(gaze_buffer)/gaze_buffer.maxlen
+
+        pose = geometry_msgs.msg.PoseStamped()
+        pose.header.stamp = rospy.Time.now()
+        pose.header.frame_id = "sandtray"
+        pose.pose.position.x = gaze[0]
+        pose.pose.position.y = gaze[1]
+
+        posepub.publish(pose)
+
+
+        #t = geometry_msgs.msg.TransformStamped()
+
+        #t.header.stamp = rospy.Time.now()
+        #t.header.frame_id = "sandtray"
+        #t.child_frame_id = "projection"
+        #t.transform.translation.x = gaze_projection[0]
+        #t.transform.translation.y = gaze_projection[1]
+        #t.transform.translation.z = 0.0
+        #q = transformations.quaternion_from_euler(0, 0, 0)
+        #t.transform.rotation.x = q[0]
+        #t.transform.rotation.y = q[1]
+        #t.transform.rotation.z = q[2]
+        #t.transform.rotation.w = q[3]
+
+        #br.sendTransform(t)
+
+        #t = geometry_msgs.msg.TransformStamped()
+
+        #t.header.stamp = rospy.Time.now()
+        #t.header.frame_id = "sandtray"
+        #t.child_frame_id = "gaze"
+        #t.transform.translation.x = gaze_origin[0] + gaze_vector[0]
+        #t.transform.translation.y = gaze_origin[1] + gaze_vector[1]
+        #t.transform.translation.z = gaze_origin[2] + gaze_vector[2]
+        #q = transformations.quaternion_from_euler(0, 0, 0)
+        #t.transform.rotation.x = q[0]
+        #t.transform.rotation.y = q[1]
+        #t.transform.rotation.z = q[2]
+        #t.transform.rotation.w = q[3]
+
+        #br.sendTransform(t)
+
+
+        rate.sleep()
+
+if __name__ == '__main__':
+
+    bridge()

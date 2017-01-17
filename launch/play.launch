@@ -49,6 +49,8 @@
             <param name="face_model" value="$(find gazr)/shape_predictor_68_face_landmarks.dat" />
             <remap from="/image" to="$(arg image)"/>
         </node>
+
+        <node name="sandtray_gaze_viz" pkg="playground_builder" type="sandtray_gaze_viz" />
     </group>
 
     <group if="$(arg with_marker_localisation)">
