@@ -1,13 +1,13 @@
 <launch>
 
-    <arg name="with_attention"      default="false" />
-    <arg name="with_robot"          default="false" />
-    <arg name="with_marker_localisation"          default="false" />
-    <arg name="nao_ip"              default="$(optenv NAO_IP 127.0.0.1)" />
-    <arg name="nao_port"            default="$(optenv NAO_PORT 9559)" />
+    <arg name="with_attention"      default="false" doc="Enable visual attention tracking" />
+    <arg name="with_robot"          default="false" doc="Run with a physical Nao" />
+    <arg name="with_marker_localisation"          default="false" doc="Enable monitoring for fiducial marker to localise the robot" />
+    <arg name="nao_ip"              default="$(optenv NAO_IP 127.0.0.1)" doc="If using a robot, Nao's IP" />
+    <arg name="nao_port"            default="$(optenv NAO_PORT 9559)" doc="If using a robot, Nao's port" />
 
     <arg name="roscore_ip"          default="127.0.0.1" />
-    <arg name="network_interface"   default="eth0" />
+    <arg name="network_interface"   default="eth0" doc="Network interface used to communicate with the robot" />
 
     <arg name="camera_frame"        default="/camera" />
 
