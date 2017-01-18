@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <chrono>
 
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
@@ -15,6 +16,10 @@ static const string HUMAN_FRAME_PREFIX = "face_";
 
 static const double FOV = 20. / 180 * M_PI; // radians
 static const float RANGE = 3; //m
+
+static const std::chrono::milliseconds MIN_ATTENTIONAL_SPAN(1000); // minimum time, in ms, that an object must remain in focus to be considered attended
+
+map<std::string, std::chrono::system_clock::time_point> last_seen_frames;
 
 static std_msgs::ColorRGBA GREEN;
 
@@ -150,14 +155,30 @@ int main( int argc, char** argv )
             if (face_idx == 0) {
                 
                 stringstream ss;
+                map<std::string, std::chrono::system_clock::time_point> seen_frames;
+
                 for(size_t i = 0 ; i < frames.size(); ++i) {
+                    auto now = std::chrono::system_clock::now();
                     if(isInFieldOfView(listener, frames[i], frame)) {
-                        ROS_DEBUG_STREAM(frames[i] << " is in the field of view of " << frame);
-                        marker_pub.publish(makeMarker(i, frames[i], GREEN));
-                        if (!ss.str().empty()) ss << " ";
-                        ss << frames[i];
+
+                        if (last_seen_frames.count(frames[i])) {
+                                auto lasttime_seen = last_seen_frames[frames[i]];
+                                seen_frames[frames[i]] = lasttime_seen;
+                                if(now - lasttime_seen > MIN_ATTENTIONAL_SPAN) {
+                                    ROS_DEBUG_STREAM(frames[i] << " is being attended to by " << frame);
+                                    marker_pub.publish(makeMarker(i, frames[i], GREEN));
+                                    if (!ss.str().empty()) ss << " ";
+                                    ss << frames[i];
+                                }
+                            }
+                            else {
+                                seen_frames[frames[i]] = now;
+                            }
                     }
                 }
+
+                last_seen_frames = seen_frames;
+
                 frames_in_fov.data = ss.str();
                 frames_in_fov_pub.publish(frames_in_fov);
 
