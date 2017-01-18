@@ -24,6 +24,12 @@ if(2.9.0 VERSION_GREATER ${OpenCV_VERSION})
     message(FATAL "OpenCV3 required!")
 endif()
 
+add_message_files(
+    DIRECTORY msg
+    FILES
+    AttentionTarget.msg
+    AttentionTargetsStamped.msg
+)
 
 add_action_files(
     DIRECTORY action
@@ -37,7 +43,7 @@ add_service_files(
 )
 
 generate_messages(
-    DEPENDENCIES actionlib_msgs geometry_msgs nav_msgs
+    DEPENDENCIES std_msgs actionlib_msgs geometry_msgs nav_msgs
 )
 
 ###################################

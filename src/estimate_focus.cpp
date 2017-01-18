@@ -7,8 +7,10 @@
 #include <visualization_msgs/Marker.h>
 #include <sensor_msgs/Range.h>
 #include <std_msgs/ColorRGBA.h>
-#include <std_msgs/String.h>
 #include <tf/transform_listener.h>
+
+#include <playground_builder/AttentionTargetsStamped.h>
+#include <playground_builder/AttentionTarget.h>
 
 using namespace std;
 
@@ -100,7 +102,7 @@ int main( int argc, char** argv )
     ros::Rate r(30);
     ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("estimate_focus", 1);
     ros::Publisher fov_pub = n.advertise<sensor_msgs::Range>("face_0_field_of_view", 1);
-    ros::Publisher frames_in_fov_pub = n.advertise<std_msgs::String>("frames_in_fov", 1);
+    ros::Publisher attentional_targets_pub = n.advertise<playground_builder::AttentionTargetsStamped>("attention_targets", 1);
 
     tf::TransformListener listener;
     vector<string> frames;
@@ -116,87 +118,93 @@ int main( int argc, char** argv )
     fov.range = RANGE;
 
 
-  ROS_INFO("Waiting until a face becomes visible...");
-  while (!listener.waitForTransform("sandtray", "face_0", ros::Time::now(), ros::Duration(.5))) {
+    ROS_INFO("Waiting until a face becomes visible...");
+    while (!listener.waitForTransform("sandtray", "face_0", ros::Time::now(), ros::Duration(.5))) {
         ROS_DEBUG("Still no face visible...");
         r.sleep();
-  }
-
-  ROS_INFO("Face detected! We can start estimating the focus of attention...");
-
-  while (ros::ok())
-  {
-    
-    // Publish the marker
-    while (marker_pub.getNumSubscribers() < 1 && fov_pub.getNumSubscribers() < 1)
-    {
-      if (!ros::ok())
-      {
-        return 0;
-      }
-      ROS_WARN_ONCE("Please create a subscriber to the marker or field of view");
-      sleep(1);
     }
 
-    frames.clear();
-    listener.getFrameStrings(frames);
+    ROS_INFO("Face detected! We can start estimating the focus of attention...");
 
-    int nb_faces = 0;
+    while (ros::ok())
+    {
 
-    std_msgs::String frames_in_fov;
+        while (marker_pub.getNumSubscribers() < 1 && fov_pub.getNumSubscribers() < 1)
+        {
+            if (!ros::ok())
+            {
+                return 0;
+            }
+            ROS_WARN_ONCE("Please create a subscriber to the marker or field of view");
+            ros::spinOnce();
+            r.sleep();
+        }
 
-    for(auto frame : frames) {
-        if(frame.find(HUMAN_FRAME_PREFIX) == 0) {
+        frames.clear();
+        listener.getFrameStrings(frames);
 
-            nb_faces++;
+        int nb_faces = 0;
 
-            int face_idx = stoi(frame.substr(HUMAN_FRAME_PREFIX.length(), 1));
+        for(auto frame : frames) {
+            if(frame.find(HUMAN_FRAME_PREFIX) == 0) {
 
-            if (face_idx == 0) {
-                
-                stringstream ss;
-                map<std::string, std::chrono::system_clock::time_point> seen_frames;
+                nb_faces++;
 
-                for(size_t i = 0 ; i < frames.size(); ++i) {
-                    auto now = std::chrono::system_clock::now();
-                    if(isInFieldOfView(listener, frames[i], frame)) {
+                int face_idx = stoi(frame.substr(HUMAN_FRAME_PREFIX.length(), 1));
 
-                        if (last_seen_frames.count(frames[i])) {
+                if (face_idx == 0) {
+
+                    playground_builder::AttentionTargetsStamped targets;
+                    targets.header.frame_id = frame;
+                    targets.header.stamp = ros::Time::now();
+
+                    map<std::string, std::chrono::system_clock::time_point> seen_frames;
+
+                    for(size_t i = 0 ; i < frames.size(); ++i) {
+                        auto now = std::chrono::system_clock::now();
+                        if(isInFieldOfView(listener, frames[i], frame)) {
+
+                            if (last_seen_frames.count(frames[i])) {
                                 auto lasttime_seen = last_seen_frames[frames[i]];
                                 seen_frames[frames[i]] = lasttime_seen;
                                 if(now - lasttime_seen > MIN_ATTENTIONAL_SPAN) {
                                     ROS_DEBUG_STREAM(frames[i] << " is being attended to by " << frame);
                                     marker_pub.publish(makeMarker(i, frames[i], GREEN));
-                                    if (!ss.str().empty()) ss << " ";
-                                    ss << frames[i];
+
+                                    playground_builder::AttentionTarget target;
+                                    target.modality = playground_builder::AttentionTarget::VISUAL;
+                                    target.frame_id = frames[i];
+                                    targets.targets.push_back(target);
                                 }
                             }
                             else {
                                 seen_frames[frames[i]] = now;
                             }
+                        }
                     }
+
+                    last_seen_frames = seen_frames;
+
+                    attentional_targets_pub.publish(targets);
+
+                    fov.range = RANGE;
+                    fov.header.stamp = ros::Time::now();
+                    fov.header.frame_id = frame;
+                    fov_pub.publish(fov); 
                 }
-
-                last_seen_frames = seen_frames;
-
-                frames_in_fov.data = ss.str();
-                frames_in_fov_pub.publish(frames_in_fov);
-
-                fov.range = RANGE;
-                fov.header.stamp = ros::Time::now();
-                fov.header.frame_id = frame;
-                fov_pub.publish(fov); 
+                else {
+                    ROS_WARN_THROTTLE(10, "Found a second human face. estimate_focus only processing face_0 for now");
+                }
             }
         }
-    }
-    if (nb_faces == 0) {
+        if (nb_faces == 0) {
 
-        // hide the field of view
-        fov.range = 0;
+            // hide the field of view
+            fov.range = 0;
 
-        fov.header.stamp = ros::Time::now();
-        fov.header.frame_id = "face_0";
-        fov_pub.publish(fov); 
+            fov.header.stamp = ros::Time::now();
+            fov.header.frame_id = "face_0";
+            fov_pub.publish(fov); 
 
     }
     r.sleep();
