@@ -5,6 +5,7 @@ project(playground_builder)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS 
+        dynamic_reconfigure
         actionlib_msgs
         roscpp 
         tf 
@@ -23,6 +24,10 @@ message(STATUS "OpenCV version: ${OpenCV_VERSION}")
 if(2.9.0 VERSION_GREATER ${OpenCV_VERSION})
     message(FATAL "OpenCV3 required!")
 endif()
+
+generate_dynamic_reconfigure_options(
+      cfg/estimate_focus.cfg
+)
 
 add_message_files(
     DIRECTORY msg
@@ -93,6 +98,7 @@ add_executable(sandtray_localisation
 target_link_libraries(sandtray_localisation ${LIBS})
 
 add_executable(estimate_focus src/estimate_focus.cpp)
+add_dependencies(estimate_focus ${PROJECT_NAME}_gencfg)
 target_link_libraries(estimate_focus ${LIBS})
 
 #############

@@ -9,6 +9,9 @@
 #include <std_msgs/ColorRGBA.h>
 #include <tf/transform_listener.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <playground_builder/estimate_focusConfig.h> // generated header from cfg/estimate_focus.cfg
+
 #include <playground_builder/AttentionTargetsStamped.h>
 #include <playground_builder/AttentionTarget.h>
 
@@ -19,12 +22,17 @@ static const string HUMAN_FRAME_PREFIX = "face_";
 static const double FOV = 20. / 180 * M_PI; // radians
 static const float RANGE = 3; //m
 
-static const std::chrono::milliseconds MIN_ATTENTIONAL_SPAN(1000); // minimum time, in ms, that an object must remain in focus to be considered attended
+std::chrono::milliseconds MIN_ATTENTIONAL_SPAN(1000); // minimum time, in ms, that an object must remain in focus to be considered attended
 
 map<std::string, std::chrono::system_clock::time_point> last_seen_frames;
 
 static std_msgs::ColorRGBA GREEN;
 
+void callback(playground_builder::estimate_focusConfig &config, uint32_t level) {
+    cout << "Hit callback" << endl;
+    ROS_INFO("Reconfiguring: attentional span is now %dms", config.attentional_span);
+    MIN_ATTENTIONAL_SPAN = chrono::milliseconds(config.attentional_span);
+}
 
 visualization_msgs::Marker makeMarker(int id, const string& frame, std_msgs::ColorRGBA color) {
 
@@ -98,6 +106,14 @@ int main( int argc, char** argv )
     GREEN.r = 0.; GREEN.g = 1.; GREEN.b = 0.; GREEN.a = 0.5;
 
     ros::init(argc, argv, "estimate_focus");
+
+    dynamic_reconfigure::Server<playground_builder::estimate_focusConfig> server;
+    dynamic_reconfigure::Server<playground_builder::estimate_focusConfig>::CallbackType f;
+
+    f = boost::bind(&callback, _1, _2);
+    server.setCallback(f);
+
+
     ros::NodeHandle n;
     ros::Rate r(30);
     ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("estimate_focus", 1);
@@ -206,7 +222,8 @@ int main( int argc, char** argv )
             fov.header.frame_id = "face_0";
             fov_pub.publish(fov); 
 
+        }
+        ros::spinOnce();
+        r.sleep();
     }
-    r.sleep();
-  }
 }
