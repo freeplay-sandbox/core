@@ -6,13 +6,12 @@ project(playground_builder)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS 
         dynamic_reconfigure
-        actionlib_msgs
+        playground_builder_msgs
         roscpp 
         tf 
         cv_bridge 
         image_transport 
         visualization_msgs
-        nav_msgs
         image_geometry 
         chilitags_catkin
         nodelet)
@@ -29,28 +28,6 @@ generate_dynamic_reconfigure_options(
       cfg/estimate_focus.cfg
 )
 
-add_message_files(
-    DIRECTORY msg
-    FILES
-    AttentionTarget.msg
-    AttentionTargetsStamped.msg
-)
-
-add_action_files(
-    DIRECTORY action
-    FILES PlaygroundNavigation.action
-)
-
-add_service_files(
-    DIRECTORY srv
-    FILES
-    PlaygroundPlan.srv
-)
-
-generate_messages(
-    DEPENDENCIES std_msgs actionlib_msgs geometry_msgs nav_msgs
-)
-
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -65,7 +42,7 @@ catkin_package(
   CATKIN_DEPENDS 
     tf
     nodelet
-    actionlib_msgs
+    playground_builder_msgs
   DEPENDS OpenCV
   LIBRARIES 
 )

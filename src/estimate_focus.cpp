@@ -26,8 +26,6 @@ std::chrono::milliseconds MIN_ATTENTIONAL_SPAN(1000); // minimum time, in ms, th
 
 map<std::string, std::chrono::system_clock::time_point> last_seen_frames;
 
-static std_msgs::ColorRGBA GREEN;
-
 void callback(playground_builder::estimate_focusConfig &config, uint32_t level) {
     cout << "Hit callback" << endl;
     ROS_INFO("Reconfiguring: attentional span is now %dms", config.attentional_span);
@@ -101,9 +99,27 @@ bool isInFieldOfView(const tf::TransformListener& listener, const string& target
 
 }
 
+/** Returns a value between 0 (no attention) and 1 (maximal attention),
+ * computed as a function of the duration a given target is being looked at.
+ *
+ * Currently, a linear function of time.
+ */
+float attentionIntensity(const chrono::milliseconds duration) {
+
+    float intensity = 0.0;
+
+    if (duration > MIN_ATTENTIONAL_SPAN) {
+
+        intensity = (duration - MIN_ATTENTIONAL_SPAN).count() / 1000.;
+
+    }
+
+    return std::min(1.0f, intensity);
+
+}
+
 int main( int argc, char** argv )
 {
-    GREEN.r = 0.; GREEN.g = 1.; GREEN.b = 0.; GREEN.a = 0.5;
 
     ros::init(argc, argv, "estimate_focus");
 
@@ -183,12 +199,18 @@ int main( int argc, char** argv )
                             if (last_seen_frames.count(frames[i])) {
                                 auto lasttime_seen = last_seen_frames[frames[i]];
                                 seen_frames[frames[i]] = lasttime_seen;
-                                if(now - lasttime_seen > MIN_ATTENTIONAL_SPAN) {
+                                auto duration = now - lasttime_seen;
+                                if(duration > MIN_ATTENTIONAL_SPAN) {
                                     ROS_DEBUG_STREAM(frames[i] << " is being attended to by " << frame);
-                                    marker_pub.publish(makeMarker(i, frames[i], GREEN));
+
+                                    auto intensity = attentionIntensity(chrono::duration_cast<chrono::milliseconds>(duration));
+                                    std_msgs::ColorRGBA col;
+                                    col.r = 1.; col.g = 1.; col.b = 0.; col.a = intensity;
+                                    marker_pub.publish(makeMarker(i, frames[i], col));
 
                                     playground_builder::AttentionTarget target;
                                     target.modality = playground_builder::AttentionTarget::VISUAL;
+                                    target.intensity = intensity;
                                     target.frame_id = frames[i];
                                     targets.targets.push_back(target);
                                 }
