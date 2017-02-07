@@ -185,26 +185,40 @@ def dist(a, b=(0,0)):
     return math.sqrt(math.pow(a[0] - b[0],2) + math.pow(a[1]-b[1],2))
 
 
-def get_point_in_zone(zone):
+def get_point_in_zone(zone, closeto=None):
     if len(ZONES) == 0 or len(ZONES[zone]) == 0:
         return None
 
-    poly = random.choice(ZONES[zone]) # randomly pick one region of the zone
+    # randomize regions
+    regions = random.sample(ZONES[zone], len(ZONES[zone]))
 
-    x=0; y=0
-    for p in poly:
-        dx, dy = p
-        x+=dx
-        y+=dy
+    candidates = []
 
-    x,y = x/len(poly), y/len(poly)
+    for poly in regions:
 
-    if distance_to_robot((x,y)) > ARM_REACH:
-        return None
-        #TODO: we should try to find another point in the zone, within reach!
+        x=0; y=0
+        for p in poly:
+            dx, dy = p
+            x+=dx
+            y+=dy
 
-    rospy.loginfo("Picked point %s,%s in %s" % (x,y,zone))
-    return Point(x=x, y=y)
+        candidates.append( (x/len(poly), y/len(poly)) )
+
+
+    best_dist = 1000
+    best_candidate = None
+
+    for c in candidates:
+        if closeto:
+            d = dist(c, closeto)
+            if d < best_dist and distance_to_robot(d) < ARM_REACH:
+                best_dist = d
+                best_candidate = Point(x=c[0], y=c[1])
+        else:
+            if distance_to_robot(d) < ARM_REACH:
+                return Point(x=c[0], y=c[1])
+
+    return best_candidate
 
 def place_random_animal():
 
@@ -216,7 +230,6 @@ def place_random_animal():
         pose = get_pose(animal)
         if pose is None: # frame not published yet!
             continue
-        #rospy.loginfo("%s is at (%.2f,%.2f)" % (animal,x,y))
 
         # animal out of reach
         if distance_to_robot(pose) > ARM_REACH:
@@ -226,14 +239,15 @@ def place_random_animal():
             continue
 
         zone = HABITATS[animal]
-        target=get_point_in_zone(zone)
 
-        # maybe the zone is not reachable?
-        if not target:
-            continue
-
-    
         if not isin(pose, ZONES[zone]):
+
+            target=get_point_in_zone(zone, closeto=pose)
+
+            # maybe the zone is not reachable?
+            if not target:
+                continue
+
             rospy.loginfo("Sending %s to %s" % (animal, zone))
             goal = playground_builder.msg.PlaygroundNavigationGoal(item=animal,goal=target)
             motion.send_goal(goal)
