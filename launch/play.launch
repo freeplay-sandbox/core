@@ -65,6 +65,10 @@
     </node>
     <node pkg="playground_builder" type="move_playground_items" name="move_playground_items">
     </node>
+    <node pkg="playground_builder" type="zones_from_image" name="playground_zones_from_image" output="screen">
+        <remap from="/image" to="/playground/image"/>
+        <remap from="/camera_info" to="/playground/camera_info"/>
+    </node>
     <node pkg="playground_builder" type="play" name="playground_play" output="screen">
     </node>
 

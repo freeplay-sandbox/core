@@ -1,0 +1,162 @@
+#!/usr/bin/env python
+
+import sys
+import numpy as np
+from copy import deepcopy
+
+import rospy
+import message_filters
+from std_msgs.msg import ColorRGBA
+from sensor_msgs.msg import Image, CameraInfo
+from visualization_msgs.msg import MarkerArray, Marker
+from geometry_msgs.msg import Point
+from cv_bridge import CvBridge, CvBridgeError
+import cv2
+
+DOWNSCALE_SIZE=200 #px
+
+REFERENCE_FRAME="/sandtray"
+
+bridge = CvBridge()
+
+COLORS=[ColorRGBA(r=0,  g=0.5,b=0,  a=1), 
+        ColorRGBA(r=0.5,g=0.5,b=0,  a=1), 
+        ColorRGBA(r=0,  g=0,  b=0.5,  a=1), 
+        ColorRGBA(r=0,  g=0.5,b=0.5,a=1)]
+
+def publish_zones(zones, scale=1):
+
+    rospy.loginfo("Publishing the detected zones on /zones")
+
+    markers = MarkerArray()
+
+    zone_id=0
+    for zone in zones:
+
+        marker = Marker()
+        marker.header.frame_id = REFERENCE_FRAME
+        marker.header.stamp = rospy.Time.now()
+        marker.ns = "playground_zone_%s" % zone_id
+        marker.action = Marker.ADD
+        marker.pose.orientation.w = 1.0
+
+        marker.type = Marker.LINE_STRIP
+        marker.scale.x = 0.005
+        marker.color = COLORS[zone_id % len(COLORS)]
+
+
+        id=0
+
+        for region in zone:
+            marker.points = []
+            marker.id = id
+            id += 1
+            startpoint = None
+            for v in region:
+                x,y=v[0] * scale
+                p = Point(x=x, y=-y) # flip Y axis
+                if startpoint is None:
+                    startpoint = p
+                marker.points.append(p)
+            marker.points.append(startpoint)
+
+            markers.markers.append(deepcopy(marker))
+
+        zone_id +=1
+
+    pub_markers.publish(markers)
+
+def mask_color(hsv, lower_col, upper_col):
+
+    mask = cv2.inRange(hsv, lower_col, upper_col)
+
+    # noise removal
+    kernel = np.ones((3,3),np.uint8)
+    opening = cv2.morphologyEx(mask,cv2.MORPH_OPEN,kernel, iterations = 2)
+
+    # sure background area
+    sure_bg = cv2.dilate(opening,kernel,iterations=1)
+
+    # Finding sure foreground area
+    dist_transform = cv2.distanceTransform(sure_bg,cv2.DIST_L2,3)
+    ret, sure_fg = cv2.threshold(dist_transform,0.25*dist_transform.max(),255,0)
+
+    sure_fg = cv2.dilate(sure_fg,kernel,iterations=2)
+
+    sure_fg = np.uint8(sure_fg)
+
+    return sure_fg
+
+def get_contours(mask, scale=1):
+    im2, contours, hierarchy = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_TC89_KCOS)
+
+    if scale==1:
+        return contours
+    else:
+        return [ (1/scale * contour).astype(int) for contour in contours]
+
+def process(img):
+
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    fx = float(DOWNSCALE_SIZE)/hsv.shape[:2][1]
+    hsv=cv2.resize(hsv,None, fx=fx,fy=fx)
+
+    lower_blue = np.array([70,0,0])
+    upper_blue = np.array([130,255,255])
+    blue_mask = mask_color(hsv, lower_blue, upper_blue)
+    #res_blue = cv2.bitwise_and(img,img, mask=blue_mask)
+
+
+    lower_green = np.array([40,0,0])
+    upper_green = np.array([70,255,255])
+    green_mask = mask_color(hsv, lower_green, upper_green)
+    #res_green = cv2.bitwise_and(img,img, mask=green_mask)
+
+    lower_yellow = np.array([1,0,0])
+    upper_yellow = np.array([40,110,255])
+    yellow_mask = mask_color(hsv, lower_yellow, upper_yellow)
+    #res_yellow = cv2.bitwise_and(img,img, mask=yellow_mask)
+
+
+    return [get_contours(blue_mask,fx),get_contours(green_mask,fx),get_contours(yellow_mask,fx)]
+
+def image_callback(msg,camera_info):
+    rospy.loginfo("Received the playground image. Detecting zones...")
+
+    f = camera_info.K[0]
+
+    try:
+        img = bridge.imgmsg_to_cv2(msg, "bgr8")
+    except CvBridgeError, e:
+        print(e)
+    else:
+        zones = process(img)
+        publish_zones(zones, scale=1/f)
+
+if __name__ == '__main__':
+
+    if "test" in sys.argv:
+        img = cv2.imread("test.png")
+
+        contours = process(img)
+
+        for c in contours:
+            cv2.drawContours(img, c, -1, (128,0,0), 2)
+
+        cv2.imshow('playground', img)
+        cv2.waitKey(0)
+
+        sys.exit(0)
+    rospy.init_node('zones_from_image')
+
+    pub_markers = rospy.Publisher("zones", MarkerArray, queue_size=5, latch=True);
+
+
+    image_sub = message_filters.Subscriber('image', Image)
+    info_sub = message_filters.Subscriber('camera_info', CameraInfo)
+
+    ts = message_filters.TimeSynchronizer([image_sub, info_sub], 10)
+    ts.registerCallback(image_callback)
+    # Spin until ctrl + c
+    rospy.loginfo("Waiting for images of the playground")
+    rospy.spin()

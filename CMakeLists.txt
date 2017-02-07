@@ -101,6 +101,7 @@ install(FILES
 catkin_install_python(PROGRAMS
     nodes/move_playground_items
     nodes/play
+    nodes/zones_from_image
     nodes/nao_playground_behaviours
     nodes/sandtray_gaze_viz
     nodes/transformations.py

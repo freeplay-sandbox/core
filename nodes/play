@@ -24,39 +24,30 @@ REFERENCE_FRAME="/sandtray"
 
 BLOCKS_SLOTS=[(0.358,-0.259),(0.098,-0.160),(0.431,-0.198),(0.537,-0.316),(0.435,-0.015),(0.510,-0.121),(0.121,-0.019),(0.519,-0.222),(0.213,-0.189),(0.261,-0.171),(0.439,-0.063),(0.296,-0.204),(0.177,-0.309),(0.087,-0.318),(0.477,-0.197),(0.084,-0.102),(0.188,-0.261),(0.138,-0.187),(0.535,-0.268),(0.133,-0.328),(0.388,-0.222),(0.562,-0.125),(0.039,-0.087),(0.052,-0.161),(0.025,-0.199),(0.026,-0.244),(0.223,-0.243),(0.361,-0.309),(0.117,-0.063),(0.278,-0.248),(0.178,-0.215),(0.042,-0.298),(0.465,-0.102)]
 
-# in cm, origin at bottom left (Inkscape convention for SVG)
-ZONES = {
-        "lake": [(5.8,17.), (11.,16.),(14.7,12.8),(18.3,9.),(15.,0.5),(7.8,1.5),(2.3,6.3),(2.1,11.8)],
-        "savannah": [(45.,33.),(46.8,25.5),(53.3,22.),(60.,22.1),(60.,33.5)],
-        "plain": [(40.,0.),(36.3,5.1),(41.5,11.7),(50.5,13.),(54.,0.)]
-        }
 
+ZONES={}
 
 EPSILON_TO_BLOCK_SLOT=0.02
 
 # hold: cube_XX: (x,y,on_slot[bool])
 blocks_positions={}
 
-def to_map(p):
-    x,y = p
-    return x/100, -(MAP_HEIGHT - y/100)
-
-# convert zones to meters with right origin
-for k,v in ZONES.items():
-    ZONES[k] = [to_map(p) for p in v]
-
-HABITATS = {"crocodile": "lake",
-            "leopard": "savannah",
-            "giraffe": "savannah",
-            "rhino": "plain",
-            "hippo": "lake",
-            "zebra": "plain",
-            "elephant": "plain",
-            "lion": "savannah"
-            }
 ANIMALS = ["zebra","elephant","leopard","lion","giraffe","rhino","crocodile","hippo"]
+HABITATS = {}
+
 
 tl=None
+
+def on_zones_received(msg):
+
+    for m in msg.markers:
+        ZONES.setdefault(m.ns, []).append([(p.x,p.y) for p in m.points])
+
+    # Randomize the initial animals habitats
+    for k in ANIMALS:
+        HABITATS[k] = random.choice(ZONES.keys())
+
+    rospy.loginfo("Randomizing the habitats of the animals. Currently: %s" % HABITATS)
 
 def get_pose(item):
 
@@ -85,6 +76,7 @@ def distance_to_robot(pose):
 
 
 def update_blocks_poses():
+    blocks_positions={}
     for f in tl.getFrameStrings():
         if "cube_" in f:
 
@@ -152,80 +144,52 @@ def find_closest_block(p):
 
 
 
-def isin(point,polygon):
+def isin(point,polygons):
     """
-    Determines if a 2D point is inside a given 2D polygon or not.
+    Determines if a 2D point is inside a given list of 2D polygon or not.
     
     :param point: a (x,y) pair
-    :param polygon: a list of (x,y) pairs.
+    :param polygon: a list of a lists of (x,y) pairs.
     
-    Copied from: http://www.ariel.com.au/a/python-point-int-poly.html
+    Based on: http://www.ariel.com.au/a/python-point-int-poly.html
     """
 
     if point is None:
         return False
 
     x,y = point
-    n = len(polygon)
-    inside =False
 
-    p1x,p1y = polygon[0]
-    for i in range(n+1):
-        p2x,p2y = polygon[i % n]
-        if y > min(p1y,p2y):
-            if y <= max(p1y,p2y):
-                if x <= max(p1x,p2x):
-                    if p1y != p2y:
-                        xinters = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
-                    if p1x == p2x or x <= xinters:
-                        inside = not inside
-        p1x,p1y = p2x,p2y
+    for polygon in polygons:
+        n = len(polygon)
+        inside =False
 
-    return inside
+        p1x,p1y = polygon[0]
+        for i in range(n+1):
+            p2x,p2y = polygon[i % n]
+            if y > min(p1y,p2y):
+                if y <= max(p1y,p2y):
+                    if x <= max(p1x,p2x):
+                        if p1y != p2y:
+                            xinters = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+                        if p1x == p2x or x <= xinters:
+                            inside = not inside
+            p1x,p1y = p2x,p2y
+
+        if inside:
+            return True
+
+    return False
 
 def dist(a, b=(0,0)):
 
     return math.sqrt(math.pow(a[0] - b[0],2) + math.pow(a[1]-b[1],2))
 
-def publish_zones():
-
-    markers = MarkerArray()
-
-    id=0
-    for zone, poly in ZONES.items():
-
-        marker = Marker()
-        marker.header.frame_id = REFERENCE_FRAME
-        marker.header.stamp = rospy.Time.now()
-        marker.ns = "playground_zones"
-        marker.action = Marker.ADD
-        marker.pose.orientation.w = 1.0
-
-        marker.id = id
-        id += 1
-        marker.type = Marker.LINE_STRIP
-        marker.scale.x = 0.005
-        marker.color.g = 1.0
-        marker.color.a = 1.0
-
-
-        for v in poly:
-            x,y=v
-            p = Point(x=x, y=y)
-            marker.points.append(p)
-
-        marker.points.append(marker.points[0])
-
-        markers.markers.append(marker)
-
-    pub_markers.publish(markers)
-
-
-
-
 
 def get_point_in_zone(zone):
-    poly = ZONES[zone]
+    if len(ZONES) == 0 or len(ZONES[zone]) == 0:
+        return None
+
+    poly = random.choice(ZONES[zone]) # randomly pick one region of the zone
 
     x=0; y=0
     for p in poly:
@@ -239,10 +203,12 @@ def get_point_in_zone(zone):
         return None
         #TODO: we should try to find another point in the zone, within reach!
 
+    rospy.loginfo("Picked point %s,%s in %s" % (x,y,zone))
     return Point(x=x, y=y)
 
 def place_random_animal():
 
+    # randomize the list of animals
     animals = random.sample(ANIMALS, len(ANIMALS))
 
     for animal in animals:
@@ -254,6 +220,9 @@ def place_random_animal():
 
         # animal out of reach
         if distance_to_robot(pose) > ARM_REACH:
+            continue
+
+        if animal not in HABITATS:
             continue
 
         zone = HABITATS[animal]
@@ -277,16 +246,19 @@ def place_random_animal():
 def place_block(close_to=None):
 
     update_blocks_poses()
+
+    if len(blocks_positions) == 0:
+        # No block!
+        return False, None
+
     slot = get_empty_slot(close_to)
     if not slot:
         rospy.loginfo("All slots occupied!")
         return False, None
 
-    rospy.loginfo("Moving a block to slot %s" % str(slot))
     block = find_closest_block(slot)
 
     if not block:
-        rospy.loginfo("No block is available!")
         return False, None
 
     rospy.loginfo("Closest block is %s" % block)
@@ -308,13 +280,11 @@ if __name__ == "__main__":
     tl = tf.TransformListener()
     rospy.sleep(0.5) # sleep a bit to make sure the TF cache is filled
 
-    pub_markers = rospy.Publisher("zones", MarkerArray, queue_size=5, latch=True);
+    zones_sub = rospy.Subscriber("zones", MarkerArray, on_zones_received);
 
     rospy.loginfo("Waiting for move_playground_items action server...")
     motion = actionlib.SimpleActionClient('move_playground_items', playground_builder.msg.PlaygroundNavigationAction)
     motion.wait_for_server()
-
-    publish_zones()
 
     rospy.loginfo("Ready to play!")
 
@@ -333,7 +303,7 @@ if __name__ == "__main__":
         if ok:
             rospy.sleep(random.uniform(0.7,1.5))
         else:
-            rospy.sleep(0.1)
+            rospy.sleep(0.2)
 
         chance = random.random()
         if chance > 0.9:
