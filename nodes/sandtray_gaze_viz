@@ -1,9 +1,18 @@
 #!/usr/bin/env python
+'''
+Computes the intersection of the gaze on a reference plane (here, the sandtray)
+
+The radius of the field of view is computed as well, and published as the 'z' coordinate
+of the pose.
+
+The gaze location is averaged over a time window to filter high frequency noise.
+'''
 
 import rospy
 import tf2_ros
 import geometry_msgs.msg
 import numpy as np
+import math
 
 import transformations
 
@@ -17,6 +26,22 @@ REF_FRAME = "sandtray"
 FRAME = "face_0"
 
 GAZE_POSE_TOPIC="/gazepose_on_sandtray"
+
+#####
+### for correct viz, THESE VALUES NEED TO BE KEPT IN SYNC WITH THE ONE IN src/estimate_focus.cpp!
+
+# human field of view
+FOV = 20. / 180 * math.pi
+
+# this value sets the level of attention (in [0, 1]) when a target is at the max distance
+# of the gaze axis permitted by the field of view FOV (ie, at the limit of the field of view)
+ATTENTION_LEVEL_AT_FOV_LIMIT = 0.01
+
+######
+
+def gaussian(x, mean, variance):
+    return math.exp(-(x-mean)*(x-mean)/(2*variance))
+
 
 br = tf2_ros.TransformBroadcaster()
 
@@ -76,13 +101,6 @@ def bridge():
 
         gaze_projection = gaze_origin + gaze_vector * t
 
-#        print("Origin: " + str(gaze_origin))
-#        print("Gaze vec: " + str(gaze_vector))
-#        print("Intersection param: " + str(t))
-#        print("Resulting proj:" + str(gaze_projection))
-
-        #set_gaze(-gaze_projection[0]*1000,gaze_projection[1]*1000)
-
         gaze_buffer.append(gaze_projection[:2])
 
         gaze = sum(gaze_buffer)/gaze_buffer.maxlen
@@ -93,40 +111,14 @@ def bridge():
         pose.pose.position.x = gaze[0]
         pose.pose.position.y = gaze[1]
 
+
+        # compute (an approximation of) the radius of the field of view, and publish it as the 'z' component of the pose
+        distance = np.linalg.norm(gaze_origin - np.array((gaze[0], gaze[1], 0)))
+        radius = math.tan(FOV/2) * distance
+
+        pose.pose.position.z = radius
+
         posepub.publish(pose)
-
-
-        #t = geometry_msgs.msg.TransformStamped()
-
-        #t.header.stamp = rospy.Time.now()
-        #t.header.frame_id = "sandtray"
-        #t.child_frame_id = "projection"
-        #t.transform.translation.x = gaze_projection[0]
-        #t.transform.translation.y = gaze_projection[1]
-        #t.transform.translation.z = 0.0
-        #q = transformations.quaternion_from_euler(0, 0, 0)
-        #t.transform.rotation.x = q[0]
-        #t.transform.rotation.y = q[1]
-        #t.transform.rotation.z = q[2]
-        #t.transform.rotation.w = q[3]
-
-        #br.sendTransform(t)
-
-        #t = geometry_msgs.msg.TransformStamped()
-
-        #t.header.stamp = rospy.Time.now()
-        #t.header.frame_id = "sandtray"
-        #t.child_frame_id = "gaze"
-        #t.transform.translation.x = gaze_origin[0] + gaze_vector[0]
-        #t.transform.translation.y = gaze_origin[1] + gaze_vector[1]
-        #t.transform.translation.z = gaze_origin[2] + gaze_vector[2]
-        #q = transformations.quaternion_from_euler(0, 0, 0)
-        #t.transform.rotation.x = q[0]
-        #t.transform.rotation.y = q[1]
-        #t.transform.rotation.z = q[2]
-        #t.transform.rotation.w = q[3]
-
-        #br.sendTransform(t)
 
 
         rate.sleep()

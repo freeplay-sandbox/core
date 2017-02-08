@@ -2,6 +2,7 @@
 #include <vector>
 #include <sstream>
 #include <chrono>
+#include <cmath>
 
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
@@ -20,9 +21,23 @@ using namespace std;
 static const string HUMAN_FRAME_PREFIX = "face_";
 
 static const double FOV = 20. / 180 * M_PI; // radians
-static const float RANGE = 3; //m
+static const float RANGE = 3.; //m
 
-std::chrono::milliseconds MIN_ATTENTIONAL_SPAN(1000); // minimum time, in ms, that an object must remain in focus to be considered attended
+// this value sets the level of attention (in [0, 1]) when a target is at the max distance
+// of the gaze axis permitted by the field of view FOV (ie, at the limit of the field of view)
+static const double ATTENTION_LEVEL_AT_FOV_LIMIT = 0.01;
+
+inline double gaussian(double x, double mean, double variance) {
+    return exp(-(x-mean)*(x-mean)/(2*variance));
+}
+
+// minimum time, in ms, that an object must remain in focus to be considered attended
+std::chrono::milliseconds MIN_ATTENTIONAL_SPAN(1000);
+
+template <class Rep, class Period>
+constexpr std::chrono::milliseconds to_ms(const std::chrono::duration<Rep,Period>& d) {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(d);
+}
 
 map<std::string, std::chrono::system_clock::time_point> last_seen_frames;
 
@@ -69,9 +84,11 @@ visualization_msgs::Marker makeMarker(int id, const string& frame, std_msgs::Col
     return marker;
 }
 
-bool isInFieldOfView(const tf::TransformListener& listener, const string& target_frame, const string& observer_frame) {
+double fieldOfViewDistance(const tf::TransformListener& listener, 
+                           const string& target_frame, 
+                           const string& observer_frame) {
 
-    if (target_frame == observer_frame) return false;
+    if (target_frame == observer_frame) return 0;
 
     tf::StampedTransform transform;
 
@@ -84,18 +101,20 @@ bool isInFieldOfView(const tf::TransformListener& listener, const string& target
     }
 
     // object behind the observer?
-    if (transform.getOrigin().x() < 0) return false;
+    if (transform.getOrigin().x() < 0) return 0.;
 
     // the field of view's main axis is the observer's X axis. So, distance to main axis is
     // simply sqrt(y^2 + z^2)
-    double distance_to_main_axis = sqrt(transform.getOrigin().y() * transform.getOrigin().y() + transform.getOrigin().z() * transform.getOrigin().z());
+    double distance_to_main_axis = sqrt(transform.getOrigin().y() * transform.getOrigin().y() + 
+                                        transform.getOrigin().z() * transform.getOrigin().z());
 
     double fov_radius_at_x = tan(FOV/2) * transform.getOrigin().x();
 
     //ROS_INFO_STREAM(target_frame << ": distance_to_main_axis: " << distance_to_main_axis << ", fov_radius_at_x: " << fov_radius_at_x);
-    if (distance_to_main_axis < fov_radius_at_x) return true;
+    
+    double variance = - fov_radius_at_x / (2*log(ATTENTION_LEVEL_AT_FOV_LIMIT));
 
-    return false;
+    return gaussian(distance_to_main_axis, 0, variance);
 
 }
 
@@ -104,17 +123,11 @@ bool isInFieldOfView(const tf::TransformListener& listener, const string& target
  *
  * Currently, a linear function of time.
  */
-float attentionIntensity(const chrono::milliseconds duration) {
+double attentionIntensity(const chrono::milliseconds duration) {
 
-    float intensity = 0.0;
+    double intensity = (1. * (duration - MIN_ATTENTIONAL_SPAN).count()) / MIN_ATTENTIONAL_SPAN.count();
 
-    if (duration > MIN_ATTENTIONAL_SPAN) {
-
-        intensity = (duration - MIN_ATTENTIONAL_SPAN).count() / 1000.;
-
-    }
-
-    return std::min(1.0f, intensity);
+    return std::max(0.0, std::min(1.0, intensity));
 
 }
 
@@ -134,7 +147,8 @@ int main( int argc, char** argv )
     ros::Rate r(30);
     ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("estimate_focus", 1);
     ros::Publisher fov_pub = n.advertise<sensor_msgs::Range>("face_0_field_of_view", 1);
-    ros::Publisher attentional_targets_pub = n.advertise<playground_builder::AttentionTargetsStamped>("attention_targets", 1);
+    ros::Publisher attentional_targets_pub = 
+                n.advertise<playground_builder::AttentionTargetsStamped>("attention_targets", 1);
 
     tf::TransformListener listener;
     vector<string> frames;
@@ -161,13 +175,16 @@ int main( int argc, char** argv )
     while (ros::ok())
     {
 
-        while (marker_pub.getNumSubscribers() < 1 && fov_pub.getNumSubscribers() < 1)
+        while (   marker_pub.getNumSubscribers() < 1
+               && fov_pub.getNumSubscribers() < 1
+               && attentional_targets_pub.getNumSubscribers() < 1)
         {
             if (!ros::ok())
             {
                 return 0;
             }
-            ROS_WARN_ONCE("Please create a subscriber to the marker or field of view");
+            ROS_WARN_ONCE("Please create a subscriber to the markers or field of view or "
+                          "attentional targets");
             ros::spinOnce();
             r.sleep();
         }
@@ -194,16 +211,19 @@ int main( int argc, char** argv )
 
                     for(size_t i = 0 ; i < frames.size(); ++i) {
                         auto now = std::chrono::system_clock::now();
-                        if(isInFieldOfView(listener, frames[i], frame)) {
+                        auto intensity_distance = fieldOfViewDistance(listener, frames[i], frame);
+                        if(intensity_distance > 0.001) {
 
                             if (last_seen_frames.count(frames[i])) {
                                 auto lasttime_seen = last_seen_frames[frames[i]];
                                 seen_frames[frames[i]] = lasttime_seen;
                                 auto duration = now - lasttime_seen;
                                 if(duration > MIN_ATTENTIONAL_SPAN) {
-                                    ROS_DEBUG_STREAM(frames[i] << " is being attended to by " << frame);
+                                    ROS_DEBUG_STREAM(frames[i] << " is being attended to by " 
+                                                               << frame);
 
-                                    auto intensity = attentionIntensity(chrono::duration_cast<chrono::milliseconds>(duration));
+                                    auto intensity_duration = attentionIntensity(to_ms(duration));
+                                    auto intensity = intensity_distance * intensity_duration;
                                     std_msgs::ColorRGBA col;
                                     col.r = 1.; col.g = 1.; col.b = 0.; col.a = intensity;
                                     marker_pub.publish(makeMarker(i, frames[i], col));
@@ -225,13 +245,16 @@ int main( int argc, char** argv )
 
                     attentional_targets_pub.publish(targets);
 
-                    fov.range = RANGE;
-                    fov.header.stamp = ros::Time::now();
-                    fov.header.frame_id = frame;
-                    fov_pub.publish(fov); 
+                    if (fov_pub.getNumSubscribers() > 0) {
+                        fov.range = RANGE;
+                        fov.header.stamp = ros::Time::now();
+                        fov.header.frame_id = frame;
+                        fov_pub.publish(fov);
+                    }
                 }
                 else {
-                    ROS_WARN_THROTTLE(10, "Found a second human face. estimate_focus only processing face_0 for now");
+                    ROS_WARN_THROTTLE(10, "Found a second human face. "
+                                          "estimate_focus only processing face_0 for now");
                 }
             }
         }
