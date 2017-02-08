@@ -31,16 +31,7 @@ GAZE_POSE_TOPIC="/gazepose_on_sandtray"
 ### for correct viz, THESE VALUES NEED TO BE KEPT IN SYNC WITH THE ONE IN src/estimate_focus.cpp!
 
 # human field of view
-FOV = 20. / 180 * math.pi
-
-# this value sets the level of attention (in [0, 1]) when a target is at the max distance
-# of the gaze axis permitted by the field of view FOV (ie, at the limit of the field of view)
-ATTENTION_LEVEL_AT_FOV_LIMIT = 0.01
-
-######
-
-def gaussian(x, mean, variance):
-    return math.exp(-(x-mean)*(x-mean)/(2*variance))
+FOV = 10. / 180 * math.pi
 
 
 br = tf2_ros.TransformBroadcaster()

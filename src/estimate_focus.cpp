@@ -20,7 +20,7 @@ using namespace std;
 
 static const string HUMAN_FRAME_PREFIX = "face_";
 
-static const double FOV = 20. / 180 * M_PI; // radians
+static const double FOV = 10. / 180 * M_PI; // radians
 static const float RANGE = 3.; //m
 
 // this value sets the level of attention (in [0, 1]) when a target is at the max distance
@@ -219,11 +219,16 @@ int main( int argc, char** argv )
                                 seen_frames[frames[i]] = lasttime_seen;
                                 auto duration = now - lasttime_seen;
                                 if(duration > MIN_ATTENTIONAL_SPAN) {
-                                    ROS_DEBUG_STREAM(frames[i] << " is being attended to by " 
-                                                               << frame);
 
                                     auto intensity_duration = attentionIntensity(to_ms(duration));
                                     auto intensity = intensity_distance * intensity_duration;
+
+                                    ROS_DEBUG_STREAM(frames[i] << " is being attended to by " 
+                                                             << frame << 
+                                                             ": distance: " << intensity_distance 
+                                                             << ", duration: " << intensity_duration
+                                                             << ", final: " << intensity);
+
                                     std_msgs::ColorRGBA col;
                                     col.r = 1.; col.g = 1.; col.b = 0.; col.a = intensity;
                                     marker_pub.publish(makeMarker(i, frames[i], col));
