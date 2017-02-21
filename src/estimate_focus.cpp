@@ -15,8 +15,8 @@
 #include <dynamic_reconfigure/server.h>
 #include <playground_builder/estimate_focusConfig.h> // generated header from cfg/estimate_focus.cfg
 
-#include <playground_builder/AttentionTargetsStamped.h>
-#include <playground_builder/AttentionTarget.h>
+#include <playground_builder_msgs/AttentionTargetsStamped.h>
+#include <playground_builder_msgs/AttentionTarget.h>
 
 using namespace std;
 
@@ -250,7 +250,7 @@ int main( int argc, char** argv )
     ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("estimate_focus", 1);
     ros::Publisher fov_pub = n.advertise<sensor_msgs::Range>("face_0_field_of_view", 1);
     ros::Publisher attentional_targets_pub = 
-                n.advertise<playground_builder::AttentionTargetsStamped>("attention_targets", 1);
+                n.advertise<playground_builder_msgs::AttentionTargetsStamped>("attention_targets", 1);
 
     tf::TransformListener listener;
     vector<string> frames;
@@ -306,7 +306,7 @@ int main( int argc, char** argv )
 
                 if (face_idx == 0) {
 
-                    playground_builder::AttentionTargetsStamped targets;
+                    playground_builder_msgs::AttentionTargetsStamped targets;
                     targets.header.frame_id = frame;
                     targets.header.stamp = ros::Time::now();
 
@@ -344,8 +344,8 @@ int main( int argc, char** argv )
                                                 gaze_projection[0], gaze_projection[1],0,
                                                 "active_zones"));
 
-                            playground_builder::AttentionTarget target;
-                            target.modality = playground_builder::AttentionTarget::VISUAL;
+                            playground_builder_msgs::AttentionTarget target;
+                            target.modality = playground_builder_msgs::AttentionTarget::VISUAL;
                             target.intensity = 1.0;
                             target.frame_id = kv.first;
                             targets.targets.push_back(target);
@@ -380,8 +380,8 @@ int main( int argc, char** argv )
                                     col.r = 1.; col.g = 1.; col.b = 0.; col.a = intensity;
                                     marker_pub.publish(makeMarker(i, frames[i], col));
 
-                                    playground_builder::AttentionTarget target;
-                                    target.modality = playground_builder::AttentionTarget::VISUAL;
+                                    playground_builder_msgs::AttentionTarget target;
+                                    target.modality = playground_builder_msgs::AttentionTarget::VISUAL;
                                     target.intensity = intensity;
                                     target.frame_id = frames[i];
                                     targets.targets.push_back(target);
