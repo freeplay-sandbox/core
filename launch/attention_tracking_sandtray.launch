@@ -1,0 +1,25 @@
+<launch>
+
+    <arg name="r_image" default="r_camera/rgb/image_raw" />
+
+    <!-- load sandtray URDF + cameras frames -->
+    <include file="$(find playground_builder)/launch/sandtray.launch" />
+
+    <include file="$(find realsense_camera)/launch/sr300_nodelet_rgdb.launch" >
+        <arg name="camera"            value="r_camera" />
+        <arg name="serial_no"     default="" />
+        <arg name="depth_registered_processing"     default="false"/>
+        <arg name="disparity_processing"            default="false"/>
+        <arg name="disparity_registered_processing" default="false"/>
+        <arg name="sw_registered_processing"        default="false" />
+    </include>
+
+    <node pkg="gazr" type="estimate" name="gazr">
+        <param name="face_model" value="$(find gazr)/shape_predictor_68_face_landmarks.dat" />
+        <remap from="/image" to="$(arg image)"/>
+    </node>
+
+    <node name="sandtray_gaze_viz" pkg="playground_builder" type="sandtray_gaze_viz" />
+    <node name="estimate_focus" pkg="playground_builder" type="estimate_focus" output="screen"/>
+
+</launch>

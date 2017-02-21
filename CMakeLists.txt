@@ -91,22 +91,19 @@ install(TARGETS
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(FILES
-    launch/play.launch
-    launch/sandtray.launch
-    launch/run_gscam.launch
-#    launch/gscam_nodelet_pipeline.launch
+install(DIRECTORY
+    launch/
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )
 
-install(FILES
-    urdf/sandtray.urdf
+install(DIRECTORY
+    urdf/
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
 )
 
 
-install(FILES
-    meshes/sandtray.dae
+install(DIRECTORY
+    meshes/
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
 )
 
