@@ -1,0 +1,30 @@
+<robot name="sandtray">
+  <link name="sandtray">
+    <visual>
+        <geometry>
+            <mesh filename="package://playground_builder/meshes/sandtray.dae"/>
+        </geometry>
+
+    </visual>
+  </link>
+  <link name="r_camera_link" />
+  <link name="l_camera_link" />
+
+    <!-- obtained from Blender: select frame in Blender, open Python console, then:
+    
+    >>> C.selected_objects[0].matrix_world.to_translation()
+    >>> C.selected_objects[0].matrix_world.to_euler()
+    -->
+  <joint name="r_camera_joint" type="fixed">
+    <parent link="sandtray"/>
+    <child link="r_camera_link"/>
+    <origin xyz="-0.134 0.346 0.019" rpy="0 -1.86 -0.78" />
+  </joint>
+
+  <joint name="l_camera_joint" type="fixed">
+    <parent link="sandtray"/>
+    <child link="l_camera_link"/>
+    <origin xyz="-0.134 -0.004 0.019" rpy="0 -1.86 0.78" />
+  </joint>
+
+</robot>

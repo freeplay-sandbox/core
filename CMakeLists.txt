@@ -93,9 +93,21 @@ install(TARGETS
 
 install(FILES
     launch/play.launch
+    launch/sandtray.launch
     launch/run_gscam.launch
 #    launch/gscam_nodelet_pipeline.launch
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+)
+
+install(FILES
+    urdf/sandtray.urdf
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
+)
+
+
+install(FILES
+    meshes/sandtray.dae
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
 )
 
 catkin_install_python(PROGRAMS
