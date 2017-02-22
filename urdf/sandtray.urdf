@@ -18,13 +18,13 @@
   <joint name="r_camera_joint" type="fixed">
     <parent link="sandtray"/>
     <child link="r_camera_link"/>
-    <origin xyz="-0.134 0.346 0.019" rpy="0 -0.292 -0.785" />
+    <origin xyz="-0.134 -0.005 0.025" rpy="0 -0.292 -0.785" />
   </joint>
 
   <joint name="l_camera_joint" type="fixed">
     <parent link="sandtray"/>
     <child link="l_camera_link"/>
-    <origin xyz="-0.134 -0.004 0.019" rpy="0 -0.292 0.785" />
+    <origin xyz="-0.134 -0.351 0.025" rpy="0 -0.292 0.785" />
   </joint>
 
 </robot>
