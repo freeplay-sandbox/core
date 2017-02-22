@@ -5,7 +5,7 @@
     <!-- load sandtray URDF + cameras frames -->
     <include file="$(find playground_builder)/launch/sandtray.launch" />
 
-    <include file="$(find realsense_camera)/launch/sr300_nodelet_rgdb.launch" >
+    <include file="$(find realsense_camera)/launch/sr300_nodelet_rgbd.launch" >
         <arg name="camera"            value="r_camera" />
         <arg name="serial_no"     default="" />
         <arg name="depth_registered_processing"     default="false"/>
