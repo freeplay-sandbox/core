@@ -1,0 +1,10 @@
+<robot name="face_0">
+  <link name="face_0">
+    <visual>
+        <geometry>
+            <mesh filename="package://playground_builder/meshes/child-face.dae"/>
+        </geometry>
+
+    </visual>
+  </link>
+</robot>

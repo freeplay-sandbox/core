@@ -15,6 +15,8 @@
     </include>
 
     <node pkg="gazr" type="estimate" name="gazr">
+        <param name="face_0_description" command="cat $(find playground_builder)/urdf/face_0.urdf" />
+        <param name="face_1_description" command="cat $(find playground_builder)/urdf/face_1.urdf" />
         <param name="face_model" value="$(find gazr)/shape_predictor_68_face_landmarks.dat" />
         <remap from="/image" to="$(arg image)"/>
     </node>
