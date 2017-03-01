@@ -1,27 +1,35 @@
 <launch>
+    <param name="face_0_description" command="cat $(find playground_builder)/urdf/face_0.urdf" />
+    <param name="face_1_description" command="cat $(find playground_builder)/urdf/face_1.urdf" />
 
     <arg name="r_image" default="r_camera/rgb/image_raw" />
-
-    <!-- load sandtray URDF + cameras frames -->
-    <include file="$(find playground_builder)/launch/sandtray.launch" />
+    <arg name="l_image" default="l_camera/rgb/image_raw" />
 
     <include file="$(find realsense_camera)/launch/sr300_nodelet_rgbd.launch" >
         <arg name="camera"            value="r_camera" />
-        <arg name="serial_no"     default="" />
+        <arg name="serial_no"  	      default="549205001038" />
+<!--        <arg name="depth_registered_processing"     default="false"/>
+        <arg name="disparity_processing"            default="false"/>
+        <arg name="disparity_registered_processing" default="false"/>
+        <arg name="sw_registered_processing"        default="false" />
+-->
+    </include>
+<!--
+    <include file="$(find realsense_camera)/launch/sr300_nodelet_rgbd.launch" >
+        <arg name="camera"            value="l_camera" />
+        <arg name="serial_no"  	      default="609203000750" />
         <arg name="depth_registered_processing"     default="false"/>
         <arg name="disparity_processing"            default="false"/>
         <arg name="disparity_registered_processing" default="false"/>
         <arg name="sw_registered_processing"        default="false" />
     </include>
+-->
 
     <node pkg="gazr" type="estimate" name="gazr">
-        <param name="face_0_description" command="cat $(find playground_builder)/urdf/face_0.urdf" />
-        <param name="face_1_description" command="cat $(find playground_builder)/urdf/face_1.urdf" />
         <param name="face_model" value="$(find gazr)/shape_predictor_68_face_landmarks.dat" />
         <remap from="/image" to="$(arg r_image)"/>
     </node>
 
-    <node name="sandtray_gaze_viz" pkg="playground_builder" type="sandtray_gaze_viz" />
     <node name="estimate_focus" pkg="playground_builder" type="estimate_focus" output="screen"/>
 
 </launch>

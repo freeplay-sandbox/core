@@ -1,0 +1,24 @@
+<launch>
+
+    <!-- load sandtray URDF + cameras frames -->
+    <include file="$(find playground_builder)/launch/sandtray.launch" />
+
+    <!-- compute the intersection of the gaze direction (based on the TF frame of a face) with the
+    sandtray, and publishes it as a 2D pose -->
+    <node pkg="playground_builder" type="sandtray_gaze_viz" name="sandtray_gaze_viz" />
+
+    <!-- build an occupancy map based on the positions of the playground items, and provide a 
+    path planning service on the playground  -->
+    <node pkg="playground_builder" type="playground_map_and_plan" name="map_and_plan" />
+
+    <!-- creates an action server that moves playground items to specific positions, 
+    using the path planner -->
+    <node pkg="playground_builder" type="move_playground_items" name="move_playground_items" />
+
+    <!-- process the playground image to extract possible zones -->
+    <node pkg="playground_builder" type="zones_from_image" name="playground_zones_from_image" output="screen">
+        <remap from="/image" to="/playground/image"/>
+        <remap from="/camera_info" to="/playground/camera_info"/>
+    </node>
+
+</launch>
