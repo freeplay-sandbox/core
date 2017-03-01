@@ -25,17 +25,34 @@ As usual:
 > make install
 ```
 
-Basic usage
------------
+Usage
+-----
 
-To get the robot to play and build/arrange the playground by itself:
+First, start `roscore` (and if desired, `rviz`) in a dedicated terminal.
 
-- Start the GUI (from QtCreator for instance)
-- `roslaunch playground-builder-ros play.launch`
+### Running the free-play sandbox environment
 
-...in whichever order you prefer...
+- start the [GUI](https://github.com/severin-lemaignan/playground-builder-qt)
+  (from QtCreator for instance). Press three times in the bottom left corner to
+  show the menu.
 
-*Currently, the nodes do not expose any particular options.*
+- `roslaunch playground_builder interactive_playground.launch`
+
+This launch file:
+
+- broadcast the sandtray 3D model + camera frames;
+- build an occupancy map based on the positions of the objects within the sandbox, and provide a 
+  A\*-based path planning service to move around said objects;
+- creates an action server to move sandbox objects to specific positions, using the path planner 
+- process the sandbox background image to extract possible zones (using simple
+  colour-based segmentation);
+- starts a node that create a ROS pose at the intersection of the `face_0` gaze
+  with the `sandtray` surface (used to display the field of view, for instance)
+
+### Autonomous play behaviour
+
+- `roslaunch playground_builder play.launch`
+
 
 Nodes documentation
 -------------------
