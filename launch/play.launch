@@ -20,7 +20,7 @@
             <arg name="network_interface" value="$(arg network_interface)" />
         </include>
 
-        <node pkg="playground_builder" type="nao_playground_behaviours" name="nao_behaviours">
+        <node pkg="freeplay_sandbox" type="nao_behaviours" name="nao_behaviours">
             <param name="nao_ip"            value="$(arg nao_ip)" />
         </node>
     </group>
@@ -32,13 +32,13 @@
 
 
     <group if="$(arg with_marker_localisation)">
-        <node pkg="playground_builder" type="sandtray_localisation" name="sandtray_localisation">
+        <node pkg="freeplay_sandbox" type="sandtray_localisation" name="sandtray_localisation">
             <remap from="/image" to="$(arg image)" />
         </node>
     </group>
 
 
-    <node pkg="playground_builder" type="play" name="playground_play" output="screen">
+    <node pkg="freeplay_sandbox" type="play" name="sandbox_play" output="screen">
     </node>
 
 </launch>

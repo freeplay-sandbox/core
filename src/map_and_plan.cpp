@@ -22,7 +22,7 @@
 #include <nav_msgs/Path.h>
 #include <cv_bridge/cv_bridge.h>
 
-#include <playground_builder_msgs/PlaygroundPlan.h>
+#include <freeplay_sandbox_msgs/PlaygroundPlan.h>
 
 using namespace std;
 using namespace cv;
@@ -203,8 +203,8 @@ public:
 
     }
 
-    bool planService(playground_builder_msgs::PlaygroundPlan::Request& req,
-                    playground_builder_msgs::PlaygroundPlan::Response& res)
+    bool planService(freeplay_sandbox_msgs::PlaygroundPlan::Request& req,
+                    freeplay_sandbox_msgs::PlaygroundPlan::Response& res)
     {
         ROS_INFO_STREAM("Got a planning request for " << req.goal.header.frame_id);
         ROS_INFO("Updating occupancy map...");

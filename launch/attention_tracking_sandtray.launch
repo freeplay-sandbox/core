@@ -1,6 +1,6 @@
 <launch>
-    <param name="face_0_description" command="cat $(find playground_builder)/urdf/face_0.urdf" />
-    <param name="face_1_description" command="cat $(find playground_builder)/urdf/face_1.urdf" />
+    <param name="face_0_description" command="cat $(find freeplay_sandbox)/urdf/face_0.urdf" />
+    <param name="face_1_description" command="cat $(find freeplay_sandbox)/urdf/face_1.urdf" />
 
     <arg name="r_image" default="r_camera/rgb/image_raw" />
     <arg name="l_image" default="l_camera/rgb/image_raw" />
@@ -30,6 +30,6 @@
         <remap from="/image" to="$(arg r_image)"/>
     </node>
 
-    <node name="estimate_focus" pkg="playground_builder" type="estimate_focus" output="screen"/>
+    <node name="estimate_focus" pkg="freeplay_sandbox" type="estimate_focus" output="screen"/>
 
 </launch>

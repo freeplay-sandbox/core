@@ -13,10 +13,10 @@
 #include <tf/transform_listener.h>
 
 #include <dynamic_reconfigure/server.h>
-#include <playground_builder/estimate_focusConfig.h> // generated header from cfg/estimate_focus.cfg
+#include <freeplay_sandbox/estimate_focusConfig.h> // generated header from cfg/estimate_focus.cfg
 
-#include <playground_builder_msgs/AttentionTargetsStamped.h>
-#include <playground_builder_msgs/AttentionTarget.h>
+#include <freeplay_sandbox_msgs/AttentionTargetsStamped.h>
+#include <freeplay_sandbox_msgs/AttentionTarget.h>
 
 using namespace std;
 
@@ -89,7 +89,7 @@ void on_zones_received(const visualization_msgs::MarkerArrayConstPtr& markers) {
 
 map<std::string, std::chrono::system_clock::time_point> last_seen_frames;
 
-void callback(playground_builder::estimate_focusConfig &config, uint32_t level) {
+void callback(freeplay_sandbox::estimate_focusConfig &config, uint32_t level) {
     cout << "Hit callback" << endl;
     ROS_INFO("Reconfiguring: attentional span is now %dms", config.attentional_span);
     MIN_ATTENTIONAL_SPAN = chrono::milliseconds(config.attentional_span);
@@ -235,8 +235,8 @@ int main( int argc, char** argv )
 
     ros::init(argc, argv, "estimate_focus");
 
-    dynamic_reconfigure::Server<playground_builder::estimate_focusConfig> server;
-    dynamic_reconfigure::Server<playground_builder::estimate_focusConfig>::CallbackType f;
+    dynamic_reconfigure::Server<freeplay_sandbox::estimate_focusConfig> server;
+    dynamic_reconfigure::Server<freeplay_sandbox::estimate_focusConfig>::CallbackType f;
 
     f = boost::bind(&callback, _1, _2);
     server.setCallback(f);
@@ -250,7 +250,7 @@ int main( int argc, char** argv )
     ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("estimate_focus", 1);
     ros::Publisher fov_pub = n.advertise<sensor_msgs::Range>("face_0_field_of_view", 1);
     ros::Publisher attentional_targets_pub = 
-                n.advertise<playground_builder_msgs::AttentionTargetsStamped>("attention_targets", 1);
+                n.advertise<freeplay_sandbox_msgs::AttentionTargetsStamped>("attention_targets", 1);
 
     tf::TransformListener listener;
     vector<string> frames;
@@ -306,7 +306,7 @@ int main( int argc, char** argv )
 
                 if (face_idx == 0) {
 
-                    playground_builder_msgs::AttentionTargetsStamped targets;
+                    freeplay_sandbox_msgs::AttentionTargetsStamped targets;
                     targets.header.frame_id = frame;
                     targets.header.stamp = ros::Time::now();
 
@@ -344,8 +344,8 @@ int main( int argc, char** argv )
                                                 gaze_projection[0], gaze_projection[1],0,
                                                 "active_zones"));
 
-                            playground_builder_msgs::AttentionTarget target;
-                            target.modality = playground_builder_msgs::AttentionTarget::VISUAL;
+                            freeplay_sandbox_msgs::AttentionTarget target;
+                            target.modality = freeplay_sandbox_msgs::AttentionTarget::VISUAL;
                             target.intensity = 1.0;
                             target.frame_id = kv.first;
                             targets.targets.push_back(target);
@@ -380,8 +380,8 @@ int main( int argc, char** argv )
                                     col.r = 1.; col.g = 1.; col.b = 0.; col.a = intensity;
                                     marker_pub.publish(makeMarker(i, frames[i], col));
 
-                                    playground_builder_msgs::AttentionTarget target;
-                                    target.modality = playground_builder_msgs::AttentionTarget::VISUAL;
+                                    freeplay_sandbox_msgs::AttentionTarget target;
+                                    target.modality = freeplay_sandbox_msgs::AttentionTarget::VISUAL;
                                     target.intensity = intensity;
                                     target.frame_id = frames[i];
                                     targets.targets.push_back(target);

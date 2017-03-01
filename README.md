@@ -1,14 +1,14 @@
-Playground Builder -- ROS interface & autonomous play behaviour
-===============================================================
+Free-play Sandbox -- ROS interface & autonomous play behaviour
+==============================================================
 
 *This is the sister repository to [the QtQuick-based
-GUI](https://github.com/severin-lemaignan/playground-builder-qt) of the
-'Playground Builder' experimental framework for Cognitive Human-Robot
+GUI](https://github.com/severin-lemaignan/freeplay-sandbox-qt) of the
+'Free-play Sandbox' experimental framework for Cognitive Human-Robot
 Interaction research.*
 
-![Display in RViz of the playground, with a Nao robot](docs/zoo-activity.png)
+![Display in RViz of the sandbox, with a Nao robot](docs/zoo-activity.png)
 
-This repository contains the most of the ROS code for the 'Playground Builder'
+This repository contains the most of the ROS code for the 'Free-play Sandbox'
 experimental framework for HRI.
 
 
@@ -18,8 +18,8 @@ Installation
 As usual:
 
 ```
-> git clone https://github.com/severin-lemaignan/playground-builder-ros.git
-> cd playground-builder-ros
+> git clone https://github.com/severin-lemaignan/freeplay-sandbox-ros.git
+> cd freeplay-sandbox-ros
 > mkdir build && cd build
 > cmake ..
 > make install
@@ -32,11 +32,11 @@ First, start `roscore` (and if desired, `rviz`) in a dedicated terminal.
 
 ### Running the free-play sandbox environment
 
-- start the [GUI](https://github.com/severin-lemaignan/playground-builder-qt)
+- start the [GUI](https://github.com/severin-lemaignan/freeplay-sandbox-qt)
   (from QtCreator for instance). Press three times in the bottom left corner to
   show the menu.
 
-- `roslaunch playground_builder interactive_playground.launch`
+- `roslaunch freeplay_sandbox interactive_playground.launch`
 
 This launch file:
 
@@ -51,19 +51,19 @@ This launch file:
 
 ### Autonomous play behaviour
 
-- `roslaunch playground_builder play.launch`
+- `roslaunch freeplay_sandbox play.launch`
 
 
 Nodes documentation
 -------------------
 
-The repository currently contains 3 main nodes: `playground_map_and_plan`,
-`move_playground_items` and `play`.
+The repository currently contains 3 main nodes: `sandbox_map_and_plan`,
+`move_sandbox_items` and `play`.
 
-### playground_map_and_plan
+### sandbox_map_and_plan
 
-`playground_map_and_plan` first wait for the shapes of everything single
-playground items to be published as marker arrays. By default, listen to the
+`sandbox_map_and_plan` first wait for the shapes of everything single
+sandbox items to be published as marker arrays. By default, listen to the
 `/footprints` topic.
 
 After this initial step, it listen over ROS TF for the position of each of the
@@ -73,12 +73,12 @@ map is currently hard-coded to 60x33.5cm, 5cm per cell**.
 It then exposes a planning service (`plan_motion`) that uses the A\*
 algorithm to plan a path to move an item from A to B.
 Upon completion the resulting path is as well published on
-the `/playground_manipulation_path` topic, for visualisation in RViz.
+the `/sandbox_manipulation_path` topic, for visualisation in RViz.
 
 
-### move_playground_items
+### move_sandbox_items
 
-This nodes exposes a ROS action server (`move_playground_items`) that waits for
+This nodes exposes a ROS action server (`move_sandbox_items`) that waits for
 a goal (item name, target position), calls the planner, and 'executes' the
 motion by publishing a sequence of ROS poses corresponding to virtual touches of
 the robot on the surface of the GUI, causing the robot to actually move items
@@ -103,7 +103,7 @@ the closest animals/blocks are always prefered.
 
 This node waits for a signal and then continuously publishes a static
 transformation between a reference point in the robot and a fiducial marker
-visible in the environment (typically, on the interaction playground).
+visible in the environment (typically, on the interaction sandbox).
 
 When running, this nodes listen on a special topic (by default,
 `/sandtray_localising`) for a signal (ie, an empty message). Upon reception of

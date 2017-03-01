@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(playground_builder)
+project(freeplay_sandbox)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS 
         dynamic_reconfigure
-        playground_builder_msgs
+        freeplay_sandbox_msgs
         roscpp 
         tf 
         cv_bridge 
@@ -42,7 +42,7 @@ catkin_package(
   CATKIN_DEPENDS 
     tf
     nodelet
-    playground_builder_msgs
+    freeplay_sandbox_msgs
   DEPENDS OpenCV
   LIBRARIES 
 )
@@ -62,8 +62,8 @@ set(LIBS
     )
 
 
-add_executable(playground_map_and_plan src/main.cpp)
-target_link_libraries(playground_map_and_plan ${LIBS})
+add_executable(sandbox_map_and_plan src/map_and_plan.cpp)
+target_link_libraries(sandbox_map_and_plan ${LIBS})
 
 #add_library(markers_nodelet src/chilitagsdetector.cpp src/nodelet.cpp)
 #add_dependencies(markers_nodelet ${catkin_EXPORTED_TARGETS})
@@ -83,7 +83,7 @@ target_link_libraries(estimate_focus ${LIBS})
 #############
 
 install(TARGETS
-    playground_map_and_plan
+    sandbox_map_and_plan
     sandtray_localisation
     estimate_focus
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -108,10 +108,10 @@ install(DIRECTORY
 )
 
 catkin_install_python(PROGRAMS
-    nodes/move_playground_items
+    nodes/move_sandbox_items
     nodes/play
     nodes/zones_from_image
-    nodes/nao_playground_behaviours
+    nodes/nao_behaviours
     nodes/sandtray_gaze_viz
     nodes/transformations.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

@@ -1,5 +1,5 @@
 <launch>
-    <param name="sandtray_description" command="cat $(find playground_builder)/urdf/sandtray.urdf" />
+    <param name="sandtray_description" command="cat $(find freeplay_sandbox)/urdf/sandtray.urdf" />
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="sandtray_publisher" >
         <remap from="robot_description" to="sandtray_description" />

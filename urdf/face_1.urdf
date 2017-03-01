@@ -2,7 +2,7 @@
   <link name="face_1">
     <visual>
         <geometry>
-            <mesh filename="package://playground_builder/meshes/child-face.dae"/>
+            <mesh filename="package://freeplay_sandbox/meshes/child-face.dae"/>
         </geometry>
 
     </visual>

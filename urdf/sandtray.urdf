@@ -2,7 +2,7 @@
   <link name="sandtray">
     <visual>
         <geometry>
-            <mesh filename="package://playground_builder/meshes/sandtray.dae"/>
+            <mesh filename="package://freeplay_sandbox/meshes/sandtray.dae"/>
         </geometry>
 
     </visual>
