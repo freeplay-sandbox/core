@@ -10,7 +10,7 @@ import actionlib
 
 from geometry_msgs.msg import PoseStamped, Point
 from visualization_msgs.msg import MarkerArray, Marker
-import freeplay_sandbox.msg
+import freeplay_sandbox_msgs.msg
 
 ANIMAL_PLACEMENT=0
 BLOCK_PLACEMENT=1
@@ -249,7 +249,7 @@ def place_random_animal():
                 continue
 
             rospy.loginfo("Sending %s to %s" % (animal, zone))
-            goal = freeplay_sandbox.msg.PlaygroundNavigationGoal(item=animal,goal=target)
+            goal = freeplay_sandbox_msgs.msg.PlaygroundNavigationGoal(item=animal,goal=target)
             motion.send_goal(goal)
             motion.wait_for_result()
     
@@ -278,7 +278,7 @@ def place_block(close_to=None):
     rospy.loginfo("Closest block is %s" % block)
 
     p = Point(x=slot[0], y=slot[1])
-    goal = freeplay_sandbox.msg.PlaygroundNavigationGoal(item=block,goal=p)
+    goal = freeplay_sandbox_msgs.msg.PlaygroundNavigationGoal(item=block,goal=p)
     motion.send_goal(goal)
     motion.wait_for_result()
 
@@ -297,7 +297,7 @@ if __name__ == "__main__":
     zones_sub = rospy.Subscriber("zones", MarkerArray, on_zones_received);
 
     rospy.loginfo("Waiting for move_playground_items action server...")
-    motion = actionlib.SimpleActionClient('move_playground_items', freeplay_sandbox.msg.PlaygroundNavigationAction)
+    motion = actionlib.SimpleActionClient('move_playground_items', freeplay_sandbox_msgs.msg.PlaygroundNavigationAction)
     motion.wait_for_server()
 
     rospy.loginfo("Ready to play!")
