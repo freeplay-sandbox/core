@@ -12,17 +12,13 @@ from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Point
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
+import matplotlib # for RGB <-> HSV color conversion
 
 DOWNSCALE_SIZE=200 #px
 
 REFERENCE_FRAME="/sandtray"
 
 bridge = CvBridge()
-
-COLORS=[ColorRGBA(r=0,  g=0.5,b=0,  a=1), 
-        ColorRGBA(r=0.5,g=0.5,b=0,  a=1), 
-        ColorRGBA(r=0,  g=0,  b=0.5,  a=1), 
-        ColorRGBA(r=0,  g=0.5,b=0.5,a=1)]
 
 def publish_zones(zones, scale=1):
 
@@ -31,18 +27,20 @@ def publish_zones(zones, scale=1):
     markers = MarkerArray()
 
     zone_id=0
-    for zone in zones:
+    for zone, color in zones:
+
+        rgb = matplotlib.colors.hsv_to_rgb(color/255.)
 
         marker = Marker()
         marker.header.frame_id = REFERENCE_FRAME
         marker.header.stamp = rospy.Time.now()
-        marker.ns = "playground_zone_%s" % zone_id
+        marker.ns = "sandbox_zone_%s" % zone_id
         marker.action = Marker.ADD
         marker.pose.orientation.w = 1.0
 
         marker.type = Marker.LINE_STRIP
         marker.scale.x = 0.005
-        marker.color = COLORS[zone_id % len(COLORS)]
+        marker.color = ColorRGBA(r=rgb[0], g=rgb[1], b=rgb[2],a=1)
 
 
         id=0
@@ -113,12 +111,20 @@ def process(img):
     #res_green = cv2.bitwise_and(img,img, mask=green_mask)
 
     lower_yellow = np.array([1,0,0])
-    upper_yellow = np.array([40,110,255])
+    upper_yellow = np.array([40,255,255])
     yellow_mask = mask_color(hsv, lower_yellow, upper_yellow)
     #res_yellow = cv2.bitwise_and(img,img, mask=yellow_mask)
 
+    lower_red = np.array([0,120,0])
+    upper_red = np.array([10,255,255])
+    red_mask = mask_color(hsv, lower_red, upper_red)
+    #res_red = cv2.bitwise_and(img,img, mask=red_mask)
 
-    return [get_contours(blue_mask,fx),get_contours(green_mask,fx),get_contours(yellow_mask,fx)]
+
+    return [(get_contours(blue_mask,fx), lower_blue + upper_blue / 2),
+            (get_contours(green_mask,fx), lower_green + upper_green / 2),
+            (get_contours(yellow_mask,fx), lower_yellow + upper_yellow / 2),
+            (get_contours(red_mask,fx), lower_red + upper_red / 2)]
 
 def image_callback(msg,camera_info):
     rospy.loginfo("Received the playground image. Detecting zones...")
