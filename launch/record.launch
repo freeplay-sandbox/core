@@ -1,12 +1,44 @@
 
 <launch>
 
-    <arg name="camera1"              default="camera" />
-    <arg name="topics" default="/tf_static /tf $(arg camera1)/color/camera_info $(arg camera1)/color/image_raw $(arg camera1)/depth/camera_info $(arg camera1)/depth/image_raw $(arg camera1)/ir/camera_info $(arg camera1)/ir/image_raw" />
+    <arg name="camera1"              default="r_camera" />
+    <arg name="camera2"              default="l_camera" />
 
+    <arg name="topics" default="/tf_static
+                                /tf
+                                $(arg camera1)/color/camera_info 
+                                $(arg camera1)/color/image_raw/compressed 
+                                $(arg camera1)/depth/camera_info 
+                                $(arg camera1)/depth/image_raw/compressedDepth 
+                                $(arg camera1)/ir/camera_info 
+                                $(arg camera1)/ir/image_raw/compressedDepth
+                                $(arg camera2)/color/camera_info 
+                                $(arg camera2)/color/image_raw/compressed 
+                                $(arg camera2)/depth/camera_info 
+                                $(arg camera2)/depth/image_raw/compressedDepth 
+                                $(arg camera2)/ir/camera_info 
+                                $(arg camera2)/ir/image_raw/compressedDepth"
+                                />
+<!--
+        <arg name="topics" default="/tf_static
+                                /tf
+                                $(arg camera1)/color/camera_info 
+                                $(arg camera1)/color/image_raw 
+                                $(arg camera1)/depth/camera_info 
+                                $(arg camera1)/depth/image_raw 
+                                $(arg camera1)/ir/camera_info 
+                                $(arg camera1)/ir/image_raw
+                                $(arg camera2)/color/camera_info 
+                                $(arg camera2)/color/image_raw 
+                                $(arg camera2)/depth/camera_info 
+                                $(arg camera2)/depth/image_raw 
+                                $(arg camera2)/ir/camera_info 
+                                $(arg camera2)/ir/image_raw"
+                                />
+-->
 
      <node pkg="rosbag" type="record" name="rosbag_record_freeplay_sandbox"
-         args="-o freeplay-sanbox $(arg topics)"
+         args="-o freeplay-sandbox $(arg topics)"
          output="screen" />
 
 </launch>

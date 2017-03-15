@@ -1,7 +1,8 @@
 
 <launch>
 
-    <arg name="camera1" default="camera" />
+    <arg name="camera1"              default="r_camera" />
+    <arg name="camera2"              default="l_camera" />
 
     <arg name="bag" default="*" />
 
@@ -18,6 +19,37 @@
 
         <!-- Start nodelet manager in provided namespace -->
         <arg name="manager" value="$(arg camera1)_nodelet_manager" />
+        <include file="$(find rgbd_launch)/launch/includes/manager.launch.xml">
+            <arg name="name"                value="$(arg manager)" />
+            <arg name="debug"               value="false" /> <!-- run in GDB? -->
+            <arg name="num_worker_threads"  value="$(arg num_worker_threads)" />
+        </include>
+
+        <!-- Load standard constellation of processing nodelets -->
+        <include file="$(find rgbd_launch)/launch/includes/processing.launch.xml">
+            <arg name="manager"                         value="$(arg manager)" />
+            <arg name="rgb"                             value="color" />
+            <arg name="ir"                              value="ir" />
+            <arg name="depth"                           value="depth" />
+            <arg name="depth_registered"                value="depth_registered" />
+            <arg name="respawn"                         value="$(arg respawn)" />
+            <arg name="rgb_processing"                  default="true"/>
+            <arg name="ir_processing"                   default="true"/>
+            <arg name="depth_processing"                default="true"/>
+            <arg name="depth_registered_processing"     default="true"/>
+            <arg name="disparity_processing"            default="true"/>
+            <arg name="disparity_registered_processing" default="true"/>
+            <arg name="hw_registered_processing"        default="false" />
+            <arg name="sw_registered_processing"        default="true" />
+        </include>
+
+    </group>
+
+    <!-- Push down all topics/nodelets into "camera" namespace -->
+    <group ns="$(arg camera2)">
+
+        <!-- Start nodelet manager in provided namespace -->
+        <arg name="manager" value="$(arg camera2)_nodelet_manager" />
         <include file="$(find rgbd_launch)/launch/includes/manager.launch.xml">
             <arg name="name"                value="$(arg manager)" />
             <arg name="debug"               value="false" /> <!-- run in GDB? -->

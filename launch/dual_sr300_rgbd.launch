@@ -6,6 +6,7 @@
     <arg name="camera1"              default="r_camera" />
     <arg name="camera1_camera_type"  default="SR300" />
     <arg name="camera1_serial_no"    default="549205001038" />
+
     <arg name="camera2"              default="l_camera" />
     <arg name="camera2_camera_type"  default="SR300" />
     <arg name="camera2_serial_no"    default="609203000750" />
@@ -39,6 +40,7 @@
 
     <group ns="$(arg camera1)">
         <include file="$(find realsense_camera)/launch/includes/nodelet.launch.xml">
+            <arg name="rgb"          value="rgb" />
             <arg name="manager"      value="/$(arg manager)" />
             <arg name="camera"       value="$(arg camera1)" />
             <arg name="camera_type"  value="$(arg camera1_camera_type)" />
@@ -48,6 +50,7 @@
 
     <group ns="$(arg camera2)">
         <include file="$(find realsense_camera)/launch/includes/nodelet.launch.xml">
+            <arg name="rgb"          value="rgb" />
             <arg name="manager"      value="/$(arg manager)" />
             <arg name="camera"       value="$(arg camera2)" />
             <arg name="camera_type"  value="$(arg camera2_camera_type)" />
