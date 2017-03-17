@@ -292,6 +292,7 @@ def place_block(close_to=None):
 if __name__ == "__main__":
 
     rospy.init_node('sandbox_player')
+    ARM_REACH = rospy.get_param('~arm_reach',0.4)
 
     rospy.loginfo("Initializing TF...")
     tl = tf.TransformListener()
@@ -303,7 +304,7 @@ if __name__ == "__main__":
     motion = actionlib.SimpleActionClient('move_sandbox_items', freeplay_sandbox_msgs.msg.PlaygroundNavigationAction)
     motion.wait_for_server()
 
-    rospy.loginfo("Ready to play!")
+    rospy.loginfo("Ready to play! My arm span is " + str(ARM_REACH) + "m (from my head)")
 
     last_pose=None
     action_idx=0

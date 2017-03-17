@@ -6,10 +6,10 @@
     <arg name="nao_ip"              default="$(optenv NAO_IP 127.0.0.1)" doc="If using a robot, Nao's IP" />
     <arg name="nao_port"            default="$(optenv NAO_PORT 9559)" doc="If using a robot, Nao's port" />
 
-    <arg name="roscore_ip"          default="127.0.0.1" />
-    <arg name="network_interface"   default="eth0" doc="Network interface used to communicate with the robot" />
+    <arg name="arm_reach"           default="0.4" doc="Robot's arm span (in m), that impact which game item are reachable for the robot" />
 
-    <arg name="camera_frame"        default="/camera" />
+    <arg name="roscore_ip"          default="127.0.0.1" />
+    <arg name="network_interface"   default="wlp2s0" doc="Network interface used to communicate with the robot" />
 
     <group if="$(arg with_robot)">
         <!-- naoqi driver -->
@@ -36,6 +36,7 @@
 
 
     <node pkg="freeplay_sandbox" type="play" name="sandbox_play" output="screen">
+	<param name="arm_reach" value="$(arg arm_reach)" />
     </node>
 
 </launch>
