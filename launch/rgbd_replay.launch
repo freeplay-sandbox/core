@@ -7,6 +7,7 @@
     <arg name="bag" default="*" />
 
     <arg name="loop" default="false" />
+    <arg name="start" default="0" />
 
     <!-- Disable respawn topics by default -->
     <arg name="respawn" default="false" />
@@ -78,10 +79,10 @@
 
 
     <node pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox"
-        args="--loop $(arg bag)"
+        args="--loop $(arg bag) --start $(arg start)"
         output="screen" if="$(arg loop)" />
     <node pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox"
-        args="--keep-alive $(arg bag)"
+        args="--keep-alive $(arg bag) --start $(arg start)"
         output="screen" unless="$(arg loop)" />
 
 </launch>
