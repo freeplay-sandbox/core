@@ -116,10 +116,10 @@ catkin_install_python(PROGRAMS
     nodes/transformations.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-#install(FILES
-#    config/markers_configuration_sample.yml
-#    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
-#)
+install(FILES
+    config/sr300.cfg
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
+)
 
 #install(FILES
 #    nodelet_markers.xml
