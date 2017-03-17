@@ -3,42 +3,42 @@
 
     <arg name="camera1"              default="r_camera" />
     <arg name="camera2"              default="l_camera" />
+    <arg name="duration"             default="1m" />
 
     <arg name="topics" default="/tf_static
                                 /tf
-                                $(arg camera1)/color/camera_info 
-                                $(arg camera1)/color/image_raw/compressed 
+				/audio/audio
+
+                                $(arg camera1)/rgb/camera_info 
+                                $(arg camera1)/rgb/image_raw/compressed 
                                 $(arg camera1)/depth/camera_info 
                                 $(arg camera1)/depth/image_raw/compressedDepth 
-                                $(arg camera1)/ir/camera_info 
-                                $(arg camera1)/ir/image_raw/compressedDepth
-                                $(arg camera2)/color/camera_info 
-                                $(arg camera2)/color/image_raw/compressed 
-                                $(arg camera2)/depth/camera_info 
-                                $(arg camera2)/depth/image_raw/compressedDepth 
-                                $(arg camera2)/ir/camera_info 
-                                $(arg camera2)/ir/image_raw/compressedDepth"
-                                />
+
+                                $(arg camera2)/rgb/camera_info 
+                                $(arg camera2)/rgb/image_raw/compressed
+                                $(arg camera2)/depth/camera_info
+                                $(arg camera2)/depth/image_raw/compressedDepth
+
+                                /kinect2/qhd/camera_info 
+                                /kinect2/qhd/image_color/compressed 
+                                "/>
 <!--
         <arg name="topics" default="/tf_static
                                 /tf
-                                $(arg camera1)/color/camera_info 
-                                $(arg camera1)/color/image_raw 
+                                $(arg camera1)/rgb/camera_info 
+                                $(arg camera1)/rgb/image_raw 
                                 $(arg camera1)/depth/camera_info 
                                 $(arg camera1)/depth/image_raw 
-                                $(arg camera1)/ir/camera_info 
-                                $(arg camera1)/ir/image_raw
-                                $(arg camera2)/color/camera_info 
-                                $(arg camera2)/color/image_raw 
+                                $(arg camera2)/rgb/camera_info 
+                                $(arg camera2)/rgb/image_raw 
                                 $(arg camera2)/depth/camera_info 
-                                $(arg camera2)/depth/image_raw 
-                                $(arg camera2)/ir/camera_info 
-                                $(arg camera2)/ir/image_raw"
+                                $(arg camera2)/depth/image_raw" 
                                 />
 -->
 
+
      <node pkg="rosbag" type="record" name="rosbag_record_freeplay_sandbox"
-         args="-o freeplay-sandbox $(arg topics)"
+         args="-o freeplay-sandbox $(arg topics) --duration=$(arg duration)"
          output="screen" />
 
 </launch>
