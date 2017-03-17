@@ -9,6 +9,10 @@
                                 /tf
 				/audio/audio
 
+				/footprints
+				/zones
+				/sandbox/image
+
                                 $(arg camera1)/rgb/camera_info 
                                 $(arg camera1)/rgb/image_raw/compressed 
                                 $(arg camera1)/depth/camera_info 
@@ -19,8 +23,8 @@
                                 $(arg camera2)/depth/camera_info
                                 $(arg camera2)/depth/image_raw/compressedDepth
 
-                                /kinect2/qhd/camera_info 
-                                /kinect2/qhd/image_color/compressed 
+                                /env_camera/qhd/camera_info 
+                                /env_camera/qhd/image_color/compressed 
                                 "/>
 <!--
         <arg name="topics" default="/tf_static
