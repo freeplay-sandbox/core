@@ -288,7 +288,7 @@ def place_block(close_to=None):
 
 if __name__ == "__main__":
 
-    rospy.init_node('playground_player')
+    rospy.init_node('sandbox_player')
 
     rospy.loginfo("Initializing TF...")
     tl = tf.TransformListener()
@@ -296,8 +296,8 @@ if __name__ == "__main__":
 
     zones_sub = rospy.Subscriber("zones", MarkerArray, on_zones_received);
 
-    rospy.loginfo("Waiting for move_playground_items action server...")
-    motion = actionlib.SimpleActionClient('move_playground_items', freeplay_sandbox_msgs.msg.PlaygroundNavigationAction)
+    rospy.loginfo("Waiting for move_sandbox_items action server...")
+    motion = actionlib.SimpleActionClient('move_sandbox_items', freeplay_sandbox_msgs.msg.PlaygroundNavigationAction)
     motion.wait_for_server()
 
     rospy.loginfo("Ready to play!")
@@ -315,9 +315,9 @@ if __name__ == "__main__":
             ok, last_pose = place_block(last_pose)
 
         if ok:
-            rospy.sleep(random.uniform(0.7,1.5))
+            rospy.sleep(random.uniform(1.2,2.5))
         else:
-            rospy.sleep(0.2)
+            rospy.sleep(0.3)
 
         chance = random.random()
         if chance > 0.9:
