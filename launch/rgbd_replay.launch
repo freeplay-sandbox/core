@@ -4,7 +4,7 @@
     <arg name="camera1"              default="r_camera" />
     <arg name="camera2"              default="l_camera" />
 
-    <arg name="bag" default="*" />
+    <arg name="bag" />
 
     <arg name="loop" default="false" />
     <arg name="start" default="0" />
@@ -13,7 +13,7 @@
     <arg name="respawn" default="false" />
 
     <!-- Worker threads for the nodelet manager -->
-    <arg name="num_worker_threads" default="4" />
+    <arg name="num_worker_threads" default="6" />
 
     <!-- Push down all topics/nodelets into "camera" namespace -->
     <group ns="$(arg camera1)">
@@ -29,17 +29,18 @@
         <!-- Load standard constellation of processing nodelets -->
         <include file="$(find rgbd_launch)/launch/includes/processing.launch.xml">
             <arg name="manager"                         value="$(arg manager)" />
-            <arg name="rgb"                             value="color" />
+            <arg name="rgb"                             value="rgb" />
             <arg name="ir"                              value="ir" />
             <arg name="depth"                           value="depth" />
             <arg name="depth_registered"                value="depth_registered" />
             <arg name="respawn"                         value="$(arg respawn)" />
             <arg name="rgb_processing"                  default="true"/>
-            <arg name="ir_processing"                   default="true"/>
+            <arg name="debayer_processing"              default="false"/> <!-- to generate the mono version of the RGB streams -->
+            <arg name="ir_processing"                   default="false"/>
             <arg name="depth_processing"                default="true"/>
             <arg name="depth_registered_processing"     default="true"/>
-            <arg name="disparity_processing"            default="true"/>
-            <arg name="disparity_registered_processing" default="true"/>
+            <arg name="disparity_processing"            default="false"/>
+            <arg name="disparity_registered_processing" default="false"/>
             <arg name="hw_registered_processing"        default="false" />
             <arg name="sw_registered_processing"        default="true" />
         </include>
@@ -60,17 +61,18 @@
         <!-- Load standard constellation of processing nodelets -->
         <include file="$(find rgbd_launch)/launch/includes/processing.launch.xml">
             <arg name="manager"                         value="$(arg manager)" />
-            <arg name="rgb"                             value="color" />
+            <arg name="rgb"                             value="rgb" />
             <arg name="ir"                              value="ir" />
             <arg name="depth"                           value="depth" />
             <arg name="depth_registered"                value="depth_registered" />
             <arg name="respawn"                         value="$(arg respawn)" />
             <arg name="rgb_processing"                  default="true"/>
-            <arg name="ir_processing"                   default="true"/>
+            <arg name="debayer_processing"              default="false"/> <!-- to generate the mono version of the RGB streams -->
+            <arg name="ir_processing"                   default="false"/>
             <arg name="depth_processing"                default="true"/>
             <arg name="depth_registered_processing"     default="true"/>
-            <arg name="disparity_processing"            default="true"/>
-            <arg name="disparity_registered_processing" default="true"/>
+            <arg name="disparity_processing"            default="false"/>
+            <arg name="disparity_registered_processing" default="false"/>
             <arg name="hw_registered_processing"        default="false" />
             <arg name="sw_registered_processing"        default="true" />
         </include>
@@ -78,11 +80,11 @@
     </group>
 
 
-    <node pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox"
+    <node  if="$(arg loop)" pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox"
         args="--loop $(arg bag) --start $(arg start)"
-        output="screen" if="$(arg loop)" />
-    <node pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox"
+        output="screen" />
+    <node  unless="$(arg loop)" pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox"
         args="--keep-alive $(arg bag) --start $(arg start)"
-        output="screen" unless="$(arg loop)" />
+        output="screen" />
 
 </launch>
