@@ -76,6 +76,8 @@ def distance_to_robot(pose):
 
 
 def update_blocks_poses():
+    global blocks_positions
+
     blocks_positions={}
     for f in tl.getFrameStrings():
         if "cube_" in f:
@@ -211,7 +213,7 @@ def get_point_in_zone(zone, closeto=None):
     for c in candidates:
         if closeto:
             d = dist(c, closeto)
-            if d < best_dist and distance_to_robot(d) < ARM_REACH:
+            if d < best_dist and distance_to_robot(c) < ARM_REACH:
                 best_dist = d
                 best_candidate = Point(x=c[0], y=c[1])
         else:
@@ -273,6 +275,7 @@ def place_block(close_to=None):
     block = find_closest_block(slot)
 
     if not block:
+        rospy.loginfo("No reachable block")
         return False, None
 
     rospy.loginfo("Closest block is %s" % block)
