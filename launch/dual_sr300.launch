@@ -2,11 +2,13 @@
 
     <arg name="camera1"              default="r_camera" />
     <arg name="camera1_camera_type"  default="SR300" />
-    <arg name="camera1_serial_no"    default="549205001038" />
+    <!-- <arg name="camera1_serial_no"    default="549205001038" /> -->
+    <arg name="camera1_serial_no"    default="618201002131" />
 
     <arg name="camera2"              default="l_camera" />
     <arg name="camera2_camera_type"  default="SR300" />
-    <arg name="camera2_serial_no"    default="609203000750" />
+    <!--    <arg name="camera2_serial_no"    default="609203000750" /> -->
+    <arg name="camera2_serial_no"    default="616205005351" />
 
     <!-- Best know configuration for generating depth registered point cloud. -->
     <arg name="mode"            default="manual" /> <!-- ' preset': uses cameras'  defaults, 'manual': enable setting WxH, FPS -->
