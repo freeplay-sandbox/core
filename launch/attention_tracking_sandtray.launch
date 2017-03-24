@@ -1,6 +1,12 @@
 <launch>
+    <arg name="face1"       default="face_0" />
+    <arg name="face2"       default="face_1" />
+
     <param name="face_0_description" command="cat $(find freeplay_sandbox)/urdf/face_0.urdf" />
     <param name="face_1_description" command="cat $(find freeplay_sandbox)/urdf/face_1.urdf" />
+
+    <param name="$(arg face1)_description" command="$(find xacro)/xacro.py $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face1)" />
+    <param name="$(arg face2)_description" command="$(find xacro)/xacro.py $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face2)" />
 
     <arg name="r_image" default="r_camera/rgb/image_raw" />
     <arg name="l_image" default="l_camera/rgb/image_raw" />

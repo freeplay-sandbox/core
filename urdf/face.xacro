@@ -1,5 +1,5 @@
-<robot name="face_0">
-  <link name="face_0">
+<robot name="$(arg name)">
+  <link name="$(arg name)">
     <visual>
         <geometry>
             <mesh filename="package://freeplay_sandbox/meshes/child-face.dae"/>
