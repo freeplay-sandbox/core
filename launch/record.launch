@@ -1,17 +1,18 @@
 
 <launch>
 
-    <arg name="camera1"              default="r_camera" />
-    <arg name="camera2"              default="l_camera" />
+    <arg name="camera1"              default="camera_1" />
+    <arg name="camera2"              default="camera_2" />
     <arg name="duration"             default="1m" />
 
-    <arg name="topics" default="/tf_static
-                                /tf
-				/audio/audio
+    <arg name="topics" default="/tf
 
-				/footprints
-				/zones
-				/sandbox/image
+                                /footprints
+                                /zones
+                                /sandbox/image
+
+                                $(arg camera1)/audio
+                                $(arg camera2)/audio
 
                                 $(arg camera1)/rgb/camera_info 
                                 $(arg camera1)/rgb/image_raw/compressed 
@@ -26,20 +27,6 @@
                                 /env_camera/qhd/camera_info 
                                 /env_camera/qhd/image_color/compressed 
                                 "/>
-<!--
-        <arg name="topics" default="/tf_static
-                                /tf
-                                $(arg camera1)/rgb/camera_info 
-                                $(arg camera1)/rgb/image_raw 
-                                $(arg camera1)/depth/camera_info 
-                                $(arg camera1)/depth/image_raw 
-                                $(arg camera2)/rgb/camera_info 
-                                $(arg camera2)/rgb/image_raw 
-                                $(arg camera2)/depth/camera_info 
-                                $(arg camera2)/depth/image_raw" 
-                                />
--->
-
 
      <node pkg="rosbag" type="record" name="rosbag_record_freeplay_sandbox"
          args="-o freeplay-sandbox $(arg topics) --duration=$(arg duration)"

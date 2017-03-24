@@ -1,0 +1,18 @@
+<!-- this launch file starts the various cameras/microphones. Actual recording 
+     is performed by record.launch
+-->
+<launch>
+    <include file="$(find freeplay_sandbox)/launch/dual_sr300.launch">
+        <arg name="camera1"         value="camera_1" />
+        <arg name="camera2"         value="camera_2" />
+        <arg name="color_width"     value="960" />
+        <arg name="color_height"    value="540" />
+        <arg name="enable_audio"     value="true" />
+    </include>
+
+    <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
+        <arg name="base_name"   value="env_camera" />
+        <arg name="publish_tf"  value="true" />
+    </include>
+
+</launch>
