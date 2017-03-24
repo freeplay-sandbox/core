@@ -2,6 +2,7 @@
     <param name="sandtray_description" command="cat $(find freeplay_sandbox)/urdf/sandtray.urdf" />
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="sandtray_publisher" >
+        <param name="use_tf_static" value="false" /> <!-- dynamically publish the frames, for better rosbag behaviour -->
         <remap from="robot_description" to="sandtray_description" />
         <remap from="joint_states" to="no_joint_states" />
     </node>
