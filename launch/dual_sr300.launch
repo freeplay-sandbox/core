@@ -28,14 +28,14 @@
         <param name="sr300config" textfile="$(find freeplay_sandbox)/config/sr300.cfg" />
         <param name="driver/enable_tf_dynamic" value="true" /> <!-- enable dynamic publishing of TF frames - important when using 2 cameras intel-ros/realsense#169 -->
 
-        <!-- configure the compressed streams -->
-        <param name="rgb/image_raw/theora/optimize_for" type="int" value="1" /> <!-- 1: Quality, 0: bitrate -->
-        <param name="rgb/image_raw/theora/quality" type="int" value="50" /> <!-- [0, 63] -->
-        <param name="rgb/image_raw/compressed/format" type="str" value="jpeg" /> <!-- jpeg/png -->
-        <param name="rgb/image_raw/compressed/jpeg_quality" type="int" value="80" />
-        <param name="rgb/image_raw/compressed/png_level" type="int" value="5" />
-        <param name="depth/image_raw/compressedDepth/depth_max" type="double" value="2.0" />
-        <param name="depth/image_raw/compressedDepth/png_level" type="int" value="5" />
+	<!-- configure the compressed streams -->
+	<param name="rgb/image_raw/theora/optimize_for" type="int" value="1" /> <!-- 1: Quality, 0: bitrate -->
+	<param name="rgb/image_raw/theora/quality" type="int" value="50" /> <!-- [0, 63] -->
+	<param name="rgb/image_raw/compressed/format" type="str" value="jpeg" /> <!-- jpeg/png -->
+	<param name="rgb/image_raw/compressed/jpeg_quality" type="int" value="80" />
+	<param name="rgb/image_raw/compressed/png_level" type="int" value="3" />
+	<param name="depth/image_raw/compressedDepth/depth_max" type="double" value="2.0" />
+	<param name="depth/image_raw/compressedDepth/png_level" type="int" value="3" />
 
         <include file="$(find realsense_camera)/launch/includes/nodelet_rgbd.launch.xml">
             <arg name="manager"      value="/$(arg manager)" />
@@ -57,14 +57,14 @@
         <param name="sr300config" textfile="$(find freeplay_sandbox)/config/sr300.cfg" />
         <param name="driver/enable_tf_dynamic" value="true" /> <!-- enable dynamic publishing of TF frames - important when using 2 cameras intel-ros/realsense#169 -->
 
-        <!-- configure the compressed streams -->
-        <param name="rgb/image_raw/theora/optimize_for" type="int" value="1" /> <!-- 1: Quality, 0: bitrate -->
-        <param name="rgb/image_raw/theora/quality" type="int" value="50" /> <!-- [0, 63] -->
-        <param name="rgb/image_raw/compressed/format" type="str" value="jpeg" /> <!-- jpeg/png -->
-        <param name="rgb/image_raw/compressed/jpeg_quality" type="int" value="80" />
-        <param name="rgb/image_raw/compressed/png_level" type="int" value="5" />
-        <param name="depth/image_raw/compressedDepth/depth_max" type="double" value="2.0" />
-        <param name="depth/image_raw/compressedDepth/png_level" type="int" value="5" />
+	<!-- configure the compressed streams -->
+	<param name="rgb/image_raw/theora/optimize_for" type="int" value="1" /> <!-- 1: Quality, 0: bitrate -->
+	<param name="rgb/image_raw/theora/quality" type="int" value="50" /> <!-- [0, 63] -->
+	<param name="rgb/image_raw/compressed/format" type="str" value="jpeg" /> <!-- jpeg/png -->
+	<param name="rgb/image_raw/compressed/jpeg_quality" type="int" value="80" />
+	<param name="rgb/image_raw/compressed/png_level" type="int" value="3" />
+	<param name="depth/image_raw/compressedDepth/depth_max" type="double" value="2.0" />
+	<param name="depth/image_raw/compressedDepth/png_level" type="int" value="3" />
 
         <include file="$(find realsense_camera)/launch/includes/nodelet_rgbd.launch.xml">
             <arg name="manager"      value="/$(arg manager)" />
