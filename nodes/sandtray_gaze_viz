@@ -6,6 +6,8 @@ The radius of the field of view is computed as well, and published as the 'z' co
 of the pose.
 
 The gaze location is averaged over a time window to filter high frequency noise.
+
+The result is published as a geometry_msgs::PoseStamped
 '''
 
 import rospy
@@ -22,16 +24,16 @@ import time
 # simple ring buffer for temporal filtering of the gaze position
 gaze_buffer = collections.deque(maxlen=5)
 
-REF_FRAME = "sandtray"
-FRAME = "face_0"
+DEFAULT_REF_FRAME = "sandtray"
+DEFAULT_FACE_FRAME = "face_0"
 
-GAZE_POSE_TOPIC="/gazepose_on_sandtray"
+GAZE_POSE_TOPIC="gazepose"
 
 #####
 ### for correct viz, THESE VALUES NEED TO BE KEPT IN SYNC WITH THE ONE IN src/estimate_focus.cpp!
 
 # human field of view
-FOV = 10. / 180 * math.pi
+DEFAULT_FOV = 10. / 180 * math.pi
 
 
 br = tf2_ros.TransformBroadcaster()
@@ -58,6 +60,10 @@ def bridge():
 
     rospy.init_node('gaze_sandtray_viz', anonymous=True)
 
+    reference_frame = rospy.get_param('~reference_frame', DEFAULT_REF_FRAME)
+    face_frame = rospy.get_param('~face_frame', DEFAULT_FACE_FRAME)
+    fieldofview = rospy.get_param('~fov', DEFAULT_FOV)
+
     tfBuffer = tf2_ros.Buffer()
     listener = tf2_ros.TransformListener(tfBuffer)
 
@@ -67,8 +73,9 @@ def bridge():
 
     while not rospy.is_shutdown():
         try:
-            trans = tfBuffer.lookup_transform(REF_FRAME, FRAME, rospy.Time())
-        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            trans = tfBuffer.lookup_transform(reference_frame, face_frame, rospy.Time())
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
+            #rospy.logwarn("Could not find a transform between %s and %s: %s" % (reference_frame,face_frame,e))
             rate.sleep()
             continue
 
@@ -98,14 +105,14 @@ def bridge():
 
         pose = geometry_msgs.msg.PoseStamped()
         pose.header.stamp = rospy.Time.now()
-        pose.header.frame_id = "sandtray"
+        pose.header.frame_id = reference_frame
         pose.pose.position.x = gaze[0]
         pose.pose.position.y = gaze[1]
 
 
         # compute (an approximation of) the radius of the field of view, and publish it as the 'z' component of the pose
         distance = np.linalg.norm(gaze_origin - np.array((gaze[0], gaze[1], 0)))
-        radius = math.tan(FOV/2) * distance
+        radius = math.tan(fieldofview/2) * distance
 
         pose.pose.position.z = radius
 

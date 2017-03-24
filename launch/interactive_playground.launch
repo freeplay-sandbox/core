@@ -5,7 +5,9 @@
 
     <!-- compute the intersection of the gaze direction (based on the TF frame of a face) with the
          sandtray, and publishes it as a 2D pose -->
-    <node pkg="freeplay_sandbox" type="sandtray_gaze_viz" name="sandtray_gaze_viz" />
+    <node pkg="freeplay_sandbox" type="sandtray_gaze_viz" name="sandtray_gaze_viz">
+            <remap from="/gazepose" to="/gazepose_on_sandtray"/>
+    </node>
 
     <!-- build an occupancy map based on the positions of the objects within the
          sandbox, and provide a path planning service to move around said objects -->
