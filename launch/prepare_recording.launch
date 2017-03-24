@@ -2,16 +2,27 @@
      is performed by record.launch
 -->
 <launch>
+    <arg name="camera1"         default="camera_1" />
+    <arg name="camera2"         default="camera_2" />
+    <arg name="env_camera"      default="env_camera" />
+
+    <include file="$(find freeplay_sandbox)/launch/sandtray.launch" >
+        <arg name="camera1"         value="$arg(camera1)" />
+        <arg name="camera2"         value="$arg(camera2)" />
+        <arg name="env_camera"      value="$arg(env_camera)" />
+    </include>
+
+
     <include file="$(find freeplay_sandbox)/launch/dual_sr300.launch">
-        <arg name="camera1"         value="camera_1" />
-        <arg name="camera2"         value="camera_2" />
+        <arg name="camera1"         value="$arg(camera1)" />
+        <arg name="camera2"         value="$arg(camera2)" />
         <arg name="color_width"     value="960" />
         <arg name="color_height"    value="540" />
         <arg name="enable_audio"     value="true" />
     </include>
 
     <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
-        <arg name="base_name"   value="env_camera" />
+        <arg name="base_name"   value="$arg(env_camera)" />
         <arg name="publish_tf"  value="true" />
     </include>
 

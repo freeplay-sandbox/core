@@ -1,5 +1,13 @@
 <launch>
-    <param name="sandtray_description" command="cat $(find freeplay_sandbox)/urdf/sandtray.urdf" />
+    <arg name="camera1"         default="camera_1" />
+    <arg name="camera2"         default="camera_2" />
+    <arg name="env_camera"      default="env_camera" />
+
+    <param name="sandtray_description" command="$(find xacro)/xacro.py
+							$(find freeplay_sandbox)/urdf/sandtray.xacro
+							camera_1:=$(arg camera_1)"
+							camera_2:=$(arg camera_2)"
+							env_camera:=$(arg env_camera)" />
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="sandtray_publisher" >
         <param name="use_tf_static" value="false" /> <!-- dynamically publish the frames, for better rosbag behaviour -->
