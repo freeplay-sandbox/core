@@ -57,12 +57,13 @@
             <arg name="color_fps"                 value="$(arg color_fps)" />
         </include>
 
-        <include if="$(arg enable_audio)" file="$(find audio_capture)/launch/capture.launch">
-            <arg name="ns" value="$(arg camera1)" />
-            <arg name="device" value="$(arg audio_device1)" />
-            <arg name="sample_rate" value="$(arg sample_rate)" />
-            <arg name="channels" value="$(arg channels)" />
-        </include>
+	<node if="$(arg enable_audio)" name="audio_capture" pkg="audio_capture" type="audio_capture" output="screen">
+	    <param name="bitrate" value="128"/>
+	    <param name="device" value="$(arg audio_device1)"/>
+	    <param name="channels" value="$(arg channels)"/>
+	    <param name="sample_rate" value="$(arg sample_rate)"/>
+	</node>
+
 
     </group> 
 
@@ -94,12 +95,12 @@
             <arg name="color_fps"                 value="$(arg color_fps)" />
         </include>
 
-        <include if="$(arg enable_audio)" file="$(find audio_capture)/launch/capture.launch">
-            <arg name="ns" value="$(arg camera2)" />
-            <arg name="device" value="$(arg audio_device2)" />
-            <arg name="sample_rate" value="$(arg sample_rate)" />
-            <arg name="channels" value="$(arg channels)" />
-        </include>
+	<node if="$(arg enable_audio)" name="audio_capture" pkg="audio_capture" type="audio_capture" output="screen">
+	    <param name="bitrate" value="128"/>
+	    <param name="device" value="$(arg audio_device2)"/>
+	    <param name="channels" value="$(arg channels)"/>
+	    <param name="sample_rate" value="$(arg sample_rate)"/>
+	</node>
 
     </group>
 
