@@ -3,6 +3,7 @@
 
     <arg name="camera1"              default="camera_1" />
     <arg name="camera2"              default="camera_2" />
+    <arg name="env_camera"           default="env_camera" />
     <arg name="duration"             default="1m" />
 
     <arg name="topics" default="/tf
@@ -24,8 +25,8 @@
                                 $(arg camera2)/depth/camera_info
                                 $(arg camera2)/depth/image_raw/compressedDepth
 
-                                /env_camera/qhd/camera_info 
-                                /env_camera/qhd/image_color/compressed 
+                                $(arg env_camera)/qhd/camera_info 
+                                $(arg env_camera)/qhd/image_color/compressed 
                                 "/>
 
      <node pkg="rosbag" type="record" name="rosbag_record_freeplay_sandbox"

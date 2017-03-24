@@ -3,10 +3,10 @@
     <arg name="camera2"         default="camera_2" />
     <arg name="env_camera"      default="env_camera" />
 
-    <param name="sandtray_description" command="$(find xacro)/xacro.py
+    <param name="sandtray_description" command="$(find xacro)/xacro --inorder
 							$(find freeplay_sandbox)/urdf/sandtray.xacro
-							camera_1:=$(arg camera_1)"
-							camera_2:=$(arg camera_2)"
+							camera1:=$(arg camera1)
+							camera2:=$(arg camera2)
 							env_camera:=$(arg env_camera)" />
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="sandtray_publisher" >
