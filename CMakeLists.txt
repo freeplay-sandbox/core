@@ -78,6 +78,9 @@ add_executable(estimate_focus src/estimate_focus.cpp)
 add_dependencies(estimate_focus ${PROJECT_NAME}_gencfg)
 target_link_libraries(estimate_focus ${LIBS})
 
+add_executable(visualfocus_assessment src/visualfocus_assessment.cpp)
+target_link_libraries(visualfocus_assessment ${LIBS})
+
 #############
 ## Install ##
 #############
@@ -86,6 +89,7 @@ install(TARGETS
     sandbox_map_and_plan
     sandtray_localisation
     estimate_focus
+    visualfocus_assessment
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
