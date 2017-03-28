@@ -10,7 +10,7 @@ using namespace std;
 
 
 bool foundSandtray = false;
-tf::Transform target_transform;
+tf::Transform robot_reference2target;
 
 string targetFrame;
 string markerFrame;
@@ -39,20 +39,17 @@ void onSignal(ros::NodeHandle& rosNode, shared_ptr<tf::TransformListener> tl, sh
     foundSandtray = true;
 
     // Re-compute the *current* transformation between the camera and the robot reference frame
-    tf::StampedTransform camera_to_robot_reference;
+    tf::StampedTransform robot_reference2camera;
 
     tl->waitForTransform(robotReferenceFrame, detector->camera_frame, ros::Time(), ros::Duration(1));
-    tl->lookupTransform(robotReferenceFrame, detector->camera_frame, ros::Time(), camera_to_robot_reference);
+    tl->lookupTransform(detector->camera_frame, robotReferenceFrame, ros::Time(), robot_reference2camera);
 
-    tf::StampedTransform target_to_marker;
-    tl->lookupTransform(markerFrame, targetFrame, ros::Time(), target_to_marker);
+    tf::StampedTransform marker2target;
+    tl->lookupTransform(targetFrame, markerFrame, ros::Time(), marker2target);
 
     // finally, compute the final transform:
     // odom -> camera -> marker -> sandtray
-    tf::StampedTransform marker_to_robot_reference;
-    marker_to_robot_reference.mult(camera_to_robot_reference, detector->transform);
-
-    target_transform.mult(marker_to_robot_reference, target_to_marker);
+    robot_reference2target = robot_reference2camera * detector->transform * marker2target;
 
     ROS_INFO("Found the fiducial marker! Starting to broadcast the robot's odom->sandtray transform");
 
@@ -108,10 +105,10 @@ int main(int argc, char* argv[])
 
         if(foundSandtray) {
             br.sendTransform(
-                tf::StampedTransform(target_transform, 
+                tf::StampedTransform(robot_reference2target, 
                                      ros::Time::now(), 
-                                     robotReferenceFrame,
-                                     targetFrame));
+                                     targetFrame,
+                                     robotReferenceFrame));
 
         }
 
