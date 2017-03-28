@@ -3,6 +3,7 @@
 
     <arg name="camera1"     default="camera_1" />
     <arg name="camera2"     default="camera_2" />
+    <arg name="env_camera"      default="env_camera" />
     <arg name="image1"      default="/rgb/image_raw" />
     <arg name="image2"      default="/rgb/image_raw" />
     <arg name="face1"       default="face_1" />
@@ -10,6 +11,11 @@
 
     <param name="$(arg face1)_description" command="$(find xacro)/xacro.py $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face1)_0" />
     <param name="$(arg face2)_description" command="$(find xacro)/xacro.py $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face2)_0" />
+    <param name="sandtray_description" command="$(find xacro)/xacro --inorder
+                                                $(find freeplay_sandbox)/urdf/sandtray.xacro
+                                                camera1:=$(arg camera1)
+                                                camera2:=$(arg camera2)
+                                                env_camera:=$(arg env_camera)" />
 
     <arg name="bag" />
 

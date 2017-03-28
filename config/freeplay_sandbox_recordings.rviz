@@ -4,10 +4,9 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
         - /camera_1 RGB1/Status1
       Splitter Ratio: 0.5
-    Tree Height: 488
+    Tree Height: 244
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -98,6 +97,7 @@ Visualization Manager:
         camera_2 RGB: true
         camera_2 depth: true
         env_camera: true
+        sandbox background: true
         zones: true
       Zoom Factor: 1
     - Class: rviz/Camera
@@ -120,6 +120,7 @@ Visualization Manager:
         camera_2 RGB: true
         camera_2 depth: true
         env_camera: true
+        sandbox background: true
         zones: true
       Zoom Factor: 1
     - Class: rviz/TF
@@ -153,37 +154,113 @@ Visualization Manager:
           Value: true
         camera_ir_optical_frame:
           Value: true
+        crocodile:
+          Value: true
+        cube_0:
+          Value: true
+        cube_1:
+          Value: true
+        cube_10:
+          Value: true
+        cube_11:
+          Value: true
+        cube_12:
+          Value: true
+        cube_13:
+          Value: true
+        cube_14:
+          Value: true
+        cube_15:
+          Value: true
+        cube_16:
+          Value: true
+        cube_17:
+          Value: true
+        cube_18:
+          Value: true
+        cube_19:
+          Value: true
+        cube_2:
+          Value: true
+        cube_20:
+          Value: true
+        cube_21:
+          Value: true
+        cube_22:
+          Value: true
+        cube_23:
+          Value: true
+        cube_24:
+          Value: true
+        cube_25:
+          Value: true
+        cube_26:
+          Value: true
+        cube_27:
+          Value: true
+        cube_28:
+          Value: true
+        cube_29:
+          Value: true
+        cube_3:
+          Value: true
+        cube_30:
+          Value: true
+        cube_31:
+          Value: true
+        cube_32:
+          Value: true
+        cube_33:
+          Value: true
+        cube_34:
+          Value: true
+        cube_35:
+          Value: true
+        cube_36:
+          Value: true
+        cube_37:
+          Value: true
+        cube_38:
+          Value: true
+        cube_39:
+          Value: true
+        cube_4:
+          Value: true
+        cube_5:
+          Value: true
+        cube_6:
+          Value: true
+        cube_7:
+          Value: true
+        cube_8:
+          Value: true
+        cube_9:
+          Value: true
+        elephant:
+          Value: true
         env_camera_ir_optical_frame:
           Value: true
         env_camera_link:
           Value: true
         env_camera_rgb_optical_frame:
           Value: true
-        l_camera_depth_frame:
+        giraffe:
           Value: true
-        l_camera_depth_optical_frame:
+        hippo:
           Value: true
-        l_camera_ir_frame:
+        leopard:
           Value: true
-        l_camera_link:
+        lion:
           Value: true
-        l_camera_rgb_frame:
-          Value: true
-        l_camera_rgb_optical_frame:
-          Value: true
-        r_camera_depth_frame:
-          Value: true
-        r_camera_depth_optical_frame:
-          Value: true
-        r_camera_ir_frame:
-          Value: true
-        r_camera_link:
-          Value: true
-        r_camera_rgb_frame:
-          Value: true
-        r_camera_rgb_optical_frame:
+        rhino:
           Value: true
         sandtray:
+          Value: true
+        toychild1:
+          Value: true
+        toychild4:
+          Value: true
+        zebra:
           Value: true
       Marker Scale: 0.200000003
       Name: TF
@@ -197,7 +274,8 @@ Visualization Manager:
               camera_1_depth_optical_frame:
                 {}
             camera_1_ir_frame:
-              {}
+              camera_ir_optical_frame:
+                {}
             camera_1_rgb_frame:
               camera_1_rgb_optical_frame:
                 {}
@@ -210,29 +288,110 @@ Visualization Manager:
             camera_2_rgb_frame:
               camera_2_rgb_optical_frame:
                 {}
+          crocodile:
+            {}
+          cube_0:
+            {}
+          cube_1:
+            {}
+          cube_10:
+            {}
+          cube_11:
+            {}
+          cube_12:
+            {}
+          cube_13:
+            {}
+          cube_14:
+            {}
+          cube_15:
+            {}
+          cube_16:
+            {}
+          cube_17:
+            {}
+          cube_18:
+            {}
+          cube_19:
+            {}
+          cube_2:
+            {}
+          cube_20:
+            {}
+          cube_21:
+            {}
+          cube_22:
+            {}
+          cube_23:
+            {}
+          cube_24:
+            {}
+          cube_25:
+            {}
+          cube_26:
+            {}
+          cube_27:
+            {}
+          cube_28:
+            {}
+          cube_29:
+            {}
+          cube_3:
+            {}
+          cube_30:
+            {}
+          cube_31:
+            {}
+          cube_32:
+            {}
+          cube_33:
+            {}
+          cube_34:
+            {}
+          cube_35:
+            {}
+          cube_36:
+            {}
+          cube_37:
+            {}
+          cube_38:
+            {}
+          cube_39:
+            {}
+          cube_4:
+            {}
+          cube_5:
+            {}
+          cube_6:
+            {}
+          cube_7:
+            {}
+          cube_8:
+            {}
+          cube_9:
+            {}
+          elephant:
+            {}
           env_camera_link:
             env_camera_rgb_optical_frame:
               env_camera_ir_optical_frame:
                 {}
-          l_camera_link:
-            l_camera_depth_frame:
-              l_camera_depth_optical_frame:
-                {}
-            l_camera_ir_frame:
-              {}
-            l_camera_rgb_frame:
-              l_camera_rgb_optical_frame:
-                {}
-          r_camera_link:
-            r_camera_depth_frame:
-              r_camera_depth_optical_frame:
-                {}
-            r_camera_ir_frame:
-              camera_ir_optical_frame:
-                {}
-            r_camera_rgb_frame:
-              r_camera_rgb_optical_frame:
-                {}
+          giraffe:
+            {}
+          hippo:
+            {}
+          leopard:
+            {}
+          lion:
+            {}
+          rhino:
+            {}
+          toychild1:
+            {}
+          toychild4:
+            {}
+          zebra:
+            {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -245,23 +404,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        camera_1_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_2_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        env_camera_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        sandtray:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Name: SandtrayModel
       Robot Description: sandtray_description
       TF Prefix: ""
@@ -288,6 +430,7 @@ Visualization Manager:
         camera_1 depth: true
         camera_2 depth: true
         env_camera: true
+        sandbox background: true
         zones: true
       Zoom Factor: 1
     - Class: rviz/Camera
@@ -310,6 +453,7 @@ Visualization Manager:
         camera_1 depth: true
         camera_2 RGB: true
         env_camera: true
+        sandbox background: true
         zones: true
       Zoom Factor: 1
     - Class: rviz/Camera
@@ -332,6 +476,7 @@ Visualization Manager:
         camera_1 depth: true
         camera_2 RGB: true
         camera_2 depth: true
+        sandbox background: true
         zones: true
       Zoom Factor: 1
     - Class: rviz/MarkerArray
@@ -342,6 +487,29 @@ Visualization Manager:
         {}
       Queue Size: 100
       Value: true
+    - Class: rviz/Camera
+      Enabled: true
+      Image Rendering: background and overlay
+      Image Topic: /sandbox/image
+      Name: sandbox background
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+      Visibility:
+        Grid: true
+        PointCloud2: true
+        SandtrayModel: true
+        TF: true
+        Value: true
+        camera_1 RGB: true
+        camera_1 depth: true
+        camera_2 RGB: true
+        camera_2 depth: true
+        env_camera: true
+        zones: true
+      Zoom Factor: 1
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -366,36 +534,36 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.60057783
+      Distance: 0.892711163
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.582792819
-        Y: -0.173959583
-        Z: -0.0700609386
+        X: 0.432870209
+        Y: -0.192946687
+        Z: 0.00365131721
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.759797454
+      Pitch: 0.704797149
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.98541069
+      Yaw: 4.2954011
     Saved: ~
 Window Geometry:
-  Camera - RGB:
-    collapsed: false
-  Camera - depth:
+  Camera:
     collapsed: false
   Displays:
     collapsed: false
   Height: 1016
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000016a0000022efc020000000cfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005a00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000001ad0000022e000000ca00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000c00430061006d006500720061010000036a000000160000000000000000fb0000000c00430061006d0065007200610100000380000000160000000000000000fb0000001c00430061006d0065007200610020002d002000640065007000740068000000036a000000160000001800000018fb0000001800430061006d0065007200610020002d00200052004700420000000380000000160000001800000018000000010000033f000000d7fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003f00000357000000ac00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000078000000165fc0100000006fb0000001800630061006d006500720061005f003100200052004700420100000000000001260000009800fffffffb0000001c00630061006d006500720061005f0031002000640065007000740068010000012c000001a1000000a400fffffffb0000001800630061006d006500720061005f0032002000520047004201000002d3000001890000009800fffffffb0000001c00630061006d006500720061005f00320020006400650070007400680100000462000001ae000000a400fffffffb000000140065006e0076005f00630061006d00650072006101000006160000016a0000008700fffffffb0000000a00560069006500770073030000004e00000080000002e100000197000000030000078000000153fc0100000002fb0000000800540069006d006500000000000000043b0000028700fffffffb0000000800540069006d00650100000000000004500000000000000000000006100000022e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001ba0000022efc020000000ffb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006300fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed0000034800000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000001aa00000139000000db00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000c00430061006d0065007200610000000378000000180000001800000018fb0000000c00430061006d0065007200610000000390000000180000001800000018fb0000001c00430061006d0065007200610020002d002000640065007000740068000000036a000000160000000000000000fb0000001800430061006d0065007200610020002d00200052004700420000000380000000160000000000000000fb0000003000530061006e00640062006f00780020006200610063006b00670072006f0075006e006400200069006d00610067006500000003c0000000180000001800000018fb0000000c00430061006d00650072006100000003c0000000180000001800000018fb0000002400730061006e00640062006f00780020006200610063006b00670072006f0075006e006401000002e9000000ef0000001800ffffff000000010000033f000000d7fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003f00000357000000b300fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000078000000165fc0100000006fb0000001800630061006d006500720061005f003100200052004700420100000000000001260000009600fffffffb0000001c00630061006d006500720061005f0031002000640065007000740068010000012c000001a1000000a200fffffffb0000001800630061006d006500720061005f0032002000520047004201000002d3000001890000009600fffffffb0000001c00630061006d006500720061005f00320020006400650070007400680100000462000001ae000000a200fffffffb000000140065006e0076005f00630061006d00650072006101000006160000016a0000008600fffffffb0000000a00560069006500770073030000004e00000080000002e100000197000000030000078000000153fc0100000002fb0000000800540069006d006500000000000000043b0000031700fffffffb0000000800540069006d00650100000000000004500000000000000000000005c00000022e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Sandbox background image:
+    collapsed: false
   Selection:
     collapsed: false
   Time:
@@ -416,4 +584,6 @@ Window Geometry:
   camera_2 depth:
     collapsed: false
   env_camera:
+    collapsed: false
+  sandbox background:
     collapsed: false
