@@ -55,10 +55,9 @@ def get_pose(item):
         rospy.logwarn_throttle(20,"%s is not yet published." % item)
         return None
 
-    try:
+    if tl.canTransform(REFERENCE_FRAME, item, rospy.Time(0)):
         (trans,rot) = tl.lookupTransform(REFERENCE_FRAME, item, rospy.Time(0))
-    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
-        rospy.logerr("TF exception! " + str(e))
+    else:
         return None
 
     return trans[0], trans[1]
@@ -82,10 +81,9 @@ def update_blocks_poses():
     for f in tl.getFrameStrings():
         if "cube_" in f:
 
-            try:
+            if tl.canTransform(REFERENCE_FRAME, f, rospy.Time(0)):
                 (trans,rot) = tl.lookupTransform(REFERENCE_FRAME, f, rospy.Time(0))
-            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
-                rospy.logerr("TF exception! " + str(e))
+            else:
                 continue
 
             x, y = trans[0], trans[1]

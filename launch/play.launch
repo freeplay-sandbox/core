@@ -26,10 +26,10 @@
     </group>
 
     <!-- Sets the image source. -->
-    <arg name="image" if="$(arg with_robot)" default="/naoqi_driver_node/camera/front/image_raw" />
+    <arg name="image" if="$(arg with_robot)" default="/naoqi_driver_node/camera/bottom/image_raw" />
 
     <group if="$(arg with_marker_localisation)">
-        <node pkg="freeplay_sandbox" type="sandtray_localisation" name="sandtray_localisation">
+        <node pkg="freeplay_sandbox" type="sandtray_localisation" name="sandtray_localisation" output="screen">
             <remap from="/image" to="$(arg image)" />
         </node>
     </group>
