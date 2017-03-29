@@ -18,13 +18,15 @@ import numpy
 axisMask=motion.AXIS_MASK_VEL
 #axisMask=motion.AXIS_MASK_ALL
 
+HEAD_FRAME="Head"
+
 tl = None
 
 def clip(v, vmin, vmax):
     return max(min(v, vmax), vmin)
 
 
-def xyz2pantilt(pose, headframe="/Head"):
+def xyz2pantilt(pose, headframe=HEAD_FRAME):
     """
     Convert a xyz target to pan and tilt angles for the head.
 
@@ -33,23 +35,29 @@ def xyz2pantilt(pose, headframe="/Head"):
     """
     #tl.waitForTransform(headframe,pose.header.frame_id, rospy.Time.now(), rospy.Duration(1.0))
     pose.header.stamp = tl.getLatestCommonTime(pose.header.frame_id, headframe)
-    pose = tl.transformPose(headframe, pose)
-    pan = numpy.arctan2(pose.pose.position.y, pose.pose.position.x)
-    tilt = numpy.arctan2(pose.pose.position.z, pose.pose.position.x)
+    transformed_pose = tl.transformPose(headframe, pose)
+    pan = numpy.arctan2(transformed_pose.pose.position.y, transformed_pose.pose.position.x)
+    tilt = numpy.arctan2(transformed_pose.pose.position.z, transformed_pose.pose.position.x)
     
-    rospy.loginfo("Computed head pan: %s, tilt: %s" % (pan, tilt))
     return (pan,tilt)
 
 def look_at(pose):
     yaw, pitch = xyz2pantilt(pose)
     yaw = clip(yaw, -2.0857, 2.0857)
     pitch = clip(-pitch, -0.6720, 0.5149) #beware the '-pitch'!
+
+    if abs(yaw) < 0.01 and abs(pitch) < 0.01:
+       return
+
     joints = ['HeadYaw','HeadPitch']
-    motionProxy.angleInterpolationWithSpeed(joints, [yaw, pitch], 0.1)
+    #motionProxy.angleInterpolationWithSpeed(joints, [yaw, pitch], 0.1) # blocking
+    speed = 0.1 if abs(yaw) > 0.1 else max(0.005, abs(yaw)) # adapt the speed to the distance to move
+    rospy.loginfo("Moving head by: pan: %s, tilt: %s at %s%% of speed" % (yaw, pitch, speed * 100))
+    motionProxy.changeAngles(joints, [yaw, pitch], speed) # non-blocking
 
 def point_at(targetpose):
     targetpose.header.stamp = tl.getLatestCommonTime(targetpose.header.frame_id, "base_footprint")
-    targetpose.pose.position.z += 0.1 # points 10cm above sandtray
+    #targetpose.pose.position.z += 0.1 # points 10cm above sandtray
     pose = tl.transformPose("base_footprint", targetpose)
     motionProxy.wbSetEffectorControl(effector, [pose.pose.position.x, pose.pose.position.y, pose.pose.position.z])
 
@@ -140,6 +148,7 @@ if __name__ == "__main__":
     while not tl.frameExists("/base_footprint"):
         rospy.logwarn("Waiting for frame /base_footprint to be published...")
         rospy.sleep(0.5)
+    rospy.loginfo("Ok! Starting robot behaviours.")
 
 
     # We need this broker to be able to construct
@@ -155,7 +164,7 @@ if __name__ == "__main__":
     motionProxy = ALProxy("ALMotion", NAO_IP, port);
     memoryProxy = ALProxy("ALMemory", NAO_IP, port);
     postureProxy = ALProxy("ALRobotPosture", NAO_IP, port)
-    fallResponder = FallResponder("fallResponder",motionProxy,memoryProxy);
+    #fallResponder = FallResponder("fallResponder",motionProxy,memoryProxy);
     
     motionProxy.wbEnableEffectorControl(effector,False); #if robot has fallen it will have a hard time getting up if the effector is still trying to be kept in a particular position
     motionProxy.wakeUp()
@@ -167,8 +176,18 @@ if __name__ == "__main__":
 
     pub_traj = rospy.Subscriber(TRAJ_TOPIC, Path, on_traj)
 
+    r = rospy.Rate(2)
+
     while not rospy.is_shutdown():
-        rospy.sleep(0.1)
+     	if tl.canTransform(HEAD_FRAME, "robot_focus",rospy.Time.now()):
+	    robot_focus = PoseStamped()
+	    robot_focus.header.stamp = rospy.Time.now()
+	    robot_focus.header.frame_id = "robot_focus"
+	    #robot_focus.pose.pose.z = -0.1
+	    look_at(robot_focus)
+	    #point_at(robot_focus)
+
+        r.sleep()
 
 
     motionProxy.rest()
