@@ -14,13 +14,12 @@ ChilitagsDetector::ChilitagsDetector(ros::NodeHandle& rosNode,
             object_found(false),
             it(rosNode),
             firstUncalibratedImage(true),
-            chilitags3d(cv::Size(0,0)) // will call setDefaultTagSize with default chilitags parameter values
+            _configuration(configuration)
 
 {
 
 
 
-    chilitags3d.readTagConfiguration(configuration, true, true);
 
 }
 
@@ -55,6 +54,10 @@ void ChilitagsDetector::setROSTransform(Matx44d trans, tf::Transform& transform)
 void ChilitagsDetector::findMarkers(const sensor_msgs::ImageConstPtr& msg, 
                                     const sensor_msgs::CameraInfoConstPtr& camerainfo)
 {
+
+    chilitags::Chilitags3D chilitags3d(Size(0,0));
+    chilitags3d.readTagConfiguration(_configuration, true, true);
+
     // updating the camera model is cheap if not modified
     cameramodel.fromCameraInfo(camerainfo);
     // publishing uncalibrated images? -> return (according to CameraInfo message documentation,

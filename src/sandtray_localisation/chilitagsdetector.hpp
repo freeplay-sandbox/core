@@ -19,28 +19,6 @@
 class ChilitagsDetector
 {
 public:
-    /**
-       Creates an object ready to find the 3D pose of chilitags.
-
- \param rosNode The node which has created the object.
- \param camaera_frame The name of the camera frame for projection onto.
- \param configFilename The name of the YAML configuration file describing rigid
-        clusters of tags. The chilitags library is distributed with a sample
-        configuration file documenting the expected format.
- \param omitOtherTags If true, ignore the tags that are not explicitly
-        listed in the configuration file. If false (default), the 3D pose of all detected
-        tags will be estimated.
- \param defaultTagSize The default size of tags (used to compute their 3D pose) when not
-        explicitly specified in the configuration file. To be accurate, the unit
-        must match the unit used for the camera calibration (usually, millimetres).
-
-        The default value is 20. A value of -1 will cause the default value from
-        the chilitags3d library to be used.
-
-        Note that it assumes all the tags have the same size. If tags have
-        different size, you may want to list them in the configuration file.
-
-*/
     ChilitagsDetector(ros::NodeHandle& rosNode,
                       const std::string& configuration);
 
@@ -58,13 +36,13 @@ private:
     image_transport::ImageTransport it;
     image_transport::CameraSubscriber sub;
 
+    std::string _configuration;
 
     image_geometry::PinholeCameraModel cameramodel;
     cv::Mat cameraMatrix, distCoeffs;
     bool firstUncalibratedImage;
 
     cv::Mat inputImage;
-    chilitags::Chilitags3D chilitags3d;
 
     void setROSTransform(cv::Matx44d trans, tf::Transform& transform);
 
