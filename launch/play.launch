@@ -1,6 +1,5 @@
 <launch>
 
-    <arg name="with_attention"      default="false" doc="Enable visual attention tracking" />
     <arg name="with_robot"          default="false" doc="Run with a physical Nao" />
     <arg name="with_marker_localisation"          default="false" doc="Enable monitoring for fiducial marker to localise the robot" />
     <arg name="nao_ip"              default="$(optenv NAO_IP 127.0.0.1)" doc="If using a robot, Nao's IP" />
@@ -34,12 +33,13 @@
     <group if="$(arg with_marker_localisation)">
         <node pkg="freeplay_sandbox" type="sandtray_localisation" name="sandtray_localisation" output="screen">
             <remap from="/image" to="$(arg image)" />
+            <param name="marker_size" value="100" /> <!-- dimension of the marker in millimeters -->
         </node>
     </group>
 
 
     <node pkg="freeplay_sandbox" type="play" name="sandbox_play" output="screen">
-	<param name="arm_reach" value="$(arg arm_reach)" />
+        <param name="arm_reach" value="$(arg arm_reach)" />
     </node>
 
 </launch>
