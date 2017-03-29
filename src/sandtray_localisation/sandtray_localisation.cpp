@@ -10,6 +10,8 @@ using namespace std;
 
 
 bool foundSandtray = false;
+
+tf::Transform upsidedown; // represent a rotation of 180deg around X -- needed to convert markers as seen by chilitags with TF frames broadcasted by Qt
 tf::Transform robot_reference2target;
 
 string targetFrame;
@@ -42,14 +44,14 @@ void onSignal(ros::NodeHandle& rosNode, shared_ptr<tf::TransformListener> tl, sh
     tf::StampedTransform robot_reference2camera;
 
     tl->waitForTransform(robotReferenceFrame, detector->camera_frame, ros::Time(), ros::Duration(1));
-    tl->lookupTransform(detector->camera_frame, robotReferenceFrame, ros::Time(), robot_reference2camera);
+    tl->lookupTransform(robotReferenceFrame, detector->camera_frame, ros::Time(), robot_reference2camera);
 
     tf::StampedTransform marker2target;
-    tl->lookupTransform(targetFrame, markerFrame, ros::Time(), marker2target);
+    tl->lookupTransform(markerFrame, targetFrame, ros::Time(), marker2target);
 
     // finally, compute the final transform:
     // odom -> camera -> marker -> sandtray
-    robot_reference2target = robot_reference2camera * detector->transform * marker2target;
+    robot_reference2target = robot_reference2camera * detector->transform * upsidedown * marker2target;
 
     ROS_INFO("Found the fiducial marker! Starting to broadcast the robot's odom->sandtray transform");
 
@@ -57,6 +59,9 @@ void onSignal(ros::NodeHandle& rosNode, shared_ptr<tf::TransformListener> tl, sh
 
 int main(int argc, char* argv[])
 {
+
+    upsidedown = tf::Transform(tf::Quaternion(1.0,0.0,0.0,0.0)); // pure rotation of 180deg around X
+
     //ROS initialization
     ros::init(argc, argv, "sandtray_localisation");
     ros::NodeHandle rosNode;
@@ -107,8 +112,8 @@ int main(int argc, char* argv[])
             br.sendTransform(
                 tf::StampedTransform(robot_reference2target, 
                                      ros::Time::now(), 
-                                     targetFrame,
-                                     robotReferenceFrame));
+                                     robotReferenceFrame,
+                                     targetFrame));
 
         }
 
