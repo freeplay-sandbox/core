@@ -4,6 +4,7 @@
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 #include <std_msgs/Empty.h>
+#include <std_msgs/String.h>
 #include "chilitagsdetector.hpp"
 
 using namespace std;
@@ -17,6 +18,8 @@ tf::Transform robot_reference2target;
 string targetFrame;
 string markerFrame;
 string robotReferenceFrame;
+
+ros::Publisher speechSignaling;
 
 void onSignal(ros::NodeHandle& rosNode, shared_ptr<tf::TransformListener> tl, shared_ptr<ChilitagsDetector> detector, const std_msgs::EmptyConstPtr& sig) {
 
@@ -54,6 +57,9 @@ void onSignal(ros::NodeHandle& rosNode, shared_ptr<tf::TransformListener> tl, sh
     robot_reference2target = robot_reference2camera * detector->transform * upsidedown * marker2target;
 
     ROS_INFO("Found the fiducial marker! Starting to broadcast the robot's odom->sandtray transform");
+    std_msgs::String msg;
+    msg.data = "I know where I am now!";
+    speechSignaling.publish(msg);
 
 }
 
@@ -66,6 +72,8 @@ int main(int argc, char* argv[])
     ros::init(argc, argv, "sandtray_localisation");
     ros::NodeHandle rosNode;
     ros::NodeHandle _private_node("~");
+
+    speechSignaling = rosNode.advertise<std_msgs::String>("speech",1);
 
     auto tl = make_shared<tf::TransformListener>();
     tf::TransformBroadcaster br;
