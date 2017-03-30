@@ -19,8 +19,6 @@
             <arg name="network_interface" value="$(arg network_interface)" />
         </include>
 
-        <node pkg="nao_apps" type="nao_speech.py" name="nao_speech" required="false" 
-              args="--pip=$(arg nao_ip) --pport=$(arg nao_port)"  />
 
         <node pkg="freeplay_sandbox" type="nao_behaviours" name="nao_behaviours">
             <param name="nao_ip"            value="$(arg nao_ip)" />
