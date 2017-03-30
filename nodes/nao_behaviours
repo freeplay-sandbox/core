@@ -9,6 +9,7 @@ from copy import deepcopy
 from naoqi import ALModule, ALBroker, ALProxy
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Path
+from std_msgs.msg import String
 import rospy
 import tf
 import motion
@@ -144,11 +145,8 @@ if __name__ == "__main__":
     else: 
         rospy.logerr('error in handedness param')
 
-    tl = tf.TransformListener()
-    while not tl.frameExists("/base_footprint"):
-        rospy.logwarn("Waiting for frame /base_footprint to be published...")
-        rospy.sleep(0.5)
-    rospy.loginfo("Ok! Starting robot behaviours.")
+    pub_speech = rospy.Publisher("/speech", String, queue_size=5)
+
 
 
     # We need this broker to be able to construct
@@ -170,22 +168,45 @@ if __name__ == "__main__":
     motionProxy.wakeUp()
     postureProxy.goToPosture("StandInit", 0.5)
 
-
     motionProxy.wbEnableEffectorControl(effector,True);
     rospy.sleep(2)
 
-    pub_traj = rospy.Subscriber(TRAJ_TOPIC, Path, on_traj)
+    tl = tf.TransformListener()
+
+    ### Check the robot is launched and properly localised wrt the sandtray
+    while True:
+        if not tl.frameExists("/base_footprint"):
+            rospy.logwarn("Waiting for frame /base_footprint to be published...")
+        else:
+            try:
+                t = tl.getLatestCommonTime("base_footprint", "sandtray")
+      	        if tl.canTransform("base_footprint", "sandtray",t):
+                    rospy.loginfo("Ok! Starting robot behaviours.")
+                    pub_speech.publish(String("Ready to go!"))
+                    break
+                else:
+                    rospy.logwarn("No transform robot->sandtray. Robot not yet localised!")
+            except:
+                rospy.logwarn("No transform robot->sandtray. Robot not yet localised!")
+
+        rospy.sleep(0.5)
+
+
+    sub_traj = rospy.Subscriber(TRAJ_TOPIC, Path, on_traj)
 
     r = rospy.Rate(2)
 
     while not rospy.is_shutdown():
-     	if tl.canTransform(HEAD_FRAME, "robot_focus",rospy.Time.now()):
-	    robot_focus = PoseStamped()
-	    robot_focus.header.stamp = rospy.Time.now()
-	    robot_focus.header.frame_id = "robot_focus"
-	    #robot_focus.pose.pose.z = -0.1
-	    look_at(robot_focus)
-	    #point_at(robot_focus)
+        try:
+            t = tl.getLatestCommonTime(HEAD_FRAME, "robot_focus")
+      	    if tl.canTransform(HEAD_FRAME, "robot_focus",t):
+	        robot_focus = PoseStamped()
+	        robot_focus.header.stamp = rospy.Time.now()
+	        robot_focus.header.frame_id = "robot_focus"
+	        look_at(robot_focus)
+	        #point_at(robot_focus)
+        except: # most likely, robot_focus is not published. That's ok, don't track it then
+            pass
 
         r.sleep()
 
