@@ -33,7 +33,6 @@
     <group if="$(arg with_marker_localisation)">
         <node pkg="freeplay_sandbox" type="sandtray_localisation" name="sandtray_localisation" output="screen">
             <remap from="/image" to="$(arg image)" />
-            <param name="marker_size" value="100" /> <!-- dimension of the marker in millimeters -->
         </node>
     </group>
 

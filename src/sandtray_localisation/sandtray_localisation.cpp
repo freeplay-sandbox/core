@@ -12,11 +12,9 @@ using namespace std;
 
 bool foundSandtray = false;
 
-tf::Transform upsidedown; // represent a rotation of 180deg around X -- needed to convert markers as seen by chilitags with TF frames broadcasted by Qt
 tf::Transform robot_reference2target;
 
 string targetFrame;
-string markerFrame;
 string robotReferenceFrame;
 
 ros::Publisher speechSignaling;
@@ -37,7 +35,10 @@ void onSignal(ros::NodeHandle& rosNode, shared_ptr<tf::TransformListener> tl, sh
     detector->stopLooking();
 
     if(!detector->object_found) {// timeout!
-        ROS_ERROR_STREAM("Could not see the fiducial marker after " << elapsedTime << "s. You might want to make sure the sandtray is in the field of view of the robot's camera!");
+        ROS_ERROR_STREAM("Could not see any fiducial markers after " << elapsedTime << "s. You might want to make sure the sandtray is in the field of view of the robot's camera!");
+        std_msgs::String msg;
+        msg.data = "I am lost!";
+        speechSignaling.publish(msg);
         return;
     }
 
@@ -49,14 +50,11 @@ void onSignal(ros::NodeHandle& rosNode, shared_ptr<tf::TransformListener> tl, sh
     tl->waitForTransform(robotReferenceFrame, detector->camera_frame, ros::Time(), ros::Duration(1));
     tl->lookupTransform(robotReferenceFrame, detector->camera_frame, ros::Time(), robot_reference2camera);
 
-    tf::StampedTransform marker2target;
-    tl->lookupTransform(markerFrame, targetFrame, ros::Time(), marker2target);
-
     // finally, compute the final transform:
-    // odom -> camera -> marker -> sandtray
-    robot_reference2target = robot_reference2camera * detector->transform * upsidedown * marker2target;
+    // odom -> camera -> marker (= sandtray origin)
+    robot_reference2target = robot_reference2camera * detector->transform;
 
-    ROS_INFO("Found the fiducial marker! Starting to broadcast the robot's odom->sandtray transform");
+    ROS_INFO("Found the fiducial markers! Starting to broadcast the robot's odom->sandtray transform");
     std_msgs::String msg;
     msg.data = "I know where I am now!";
     speechSignaling.publish(msg);
@@ -65,8 +63,6 @@ void onSignal(ros::NodeHandle& rosNode, shared_ptr<tf::TransformListener> tl, sh
 
 int main(int argc, char* argv[])
 {
-
-    upsidedown = tf::Transform(tf::Quaternion(1.0,0.0,0.0,0.0)); // pure rotation of 180deg around X
 
     //ROS initialization
     ros::init(argc, argv, "sandtray_localisation");
@@ -83,19 +79,34 @@ int main(int argc, char* argv[])
     _private_node.param<string>("signaling_topic", signalingTopic, "sandtray_localising");
 
     _private_node.param<string>("target_frame", targetFrame, "sandtray");
-    _private_node.param<string>("marker_frame", markerFrame, "fiducial_marker");
     _private_node.param<string>("robot_reference_frame", robotReferenceFrame, "odom");
-    string markerId;
-    _private_node.param<string>("marker_id", markerId, "709");
-    string markerSize;
-    _private_node.param<string>("marker_size", markerSize, "100");
 
-    string configuration = "%YAML:1.0\n" + targetFrame + ":\n    - tag: " + markerId + "\n      size: " + markerSize + "\n";
+    const int MARKER_SIZE = 80; //mm
+    const int MARKER_PADDING = 20; //mm
+    const int FIRST_MARKER_X = 60; //mm
+    const int FIRST_MARKER_Y = 25; //mm
+    const int MARKERS_PER_LINE = 5;
 
-    while(!tl->frameExists(robotReferenceFrame)) {
+
+    string configuration = "%YAML:1.0\n"
+                           "markers:\n";
+
+    for (int tag : {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}) {
+        int x = FIRST_MARKER_X + (tag % MARKERS_PER_LINE) * (MARKER_SIZE + MARKER_PADDING);
+        int y = FIRST_MARKER_Y + (tag / MARKERS_PER_LINE) * (MARKER_SIZE + MARKER_PADDING);
+
+        configuration +=   "    - tag: " + to_string(tag + 700) + "\n"
+                           "      size: " + to_string(MARKER_SIZE) + "\n"
+                           "      translation: [" + to_string(x) + ", " + to_string(-y) + ", 0]\n" // note the '-y' to match sandtray orientation
+                           "      rotation: [180, 0, 0]\n" // match sandtray orientation
+                           "      keep: 0\n";
+    }
+
+    while(!tl->frameExists(robotReferenceFrame) && ros::ok()) {
         ROS_WARN_STREAM("Waiting for reference frame " << robotReferenceFrame << " to become available...");
         ros::Duration(1).sleep();
     }
+
     
     // initialize the detector by subscribing to the camera video stream
     auto detector = make_shared<ChilitagsDetector>(rosNode, configuration);
