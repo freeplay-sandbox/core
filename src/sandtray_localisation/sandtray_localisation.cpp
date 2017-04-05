@@ -81,6 +81,19 @@ int main(int argc, char* argv[])
     _private_node.param<string>("target_frame", targetFrame, "sandtray");
     _private_node.param<string>("robot_reference_frame", robotReferenceFrame, "odom");
 
+    // if set to true, a special TF frame 'arm_reach' is published: (x,y)
+    // correspond to the projection of the robot shoulder onto the sandtray
+    // plan; z correspond to the radius of the arm reach at the intersection
+    // point with the sandtray
+    bool broadcastArmReach;
+    string armReachFrame;
+    double armReach;
+    string armReachOriginFrame;
+    _private_node.param<bool>("broadcast_arm_reach", broadcastArmReach, false);
+    _private_node.param<string>("arm_reach_frame", armReachFrame, "arm_reach");
+    _private_node.param<double>("arm_reach", armReach, 0.4); // arm reach, in meter, from the robot shoulder
+    _private_node.param<string>("arm_reach_origin_frame", armReachOriginFrame, "RShoulder"); // origin frame used to compute arm reach
+
     const int MARKER_SIZE = 80; //mm
     const int MARKER_PADDING = 20; //mm
     const int FIRST_MARKER_X = 60; //mm
@@ -134,6 +147,21 @@ int main(int argc, char* argv[])
                                      robotReferenceFrame,
                                      targetFrame));
 
+            if(broadcastArmReach) {
+                tf::StampedTransform armreachTransform;
+
+                tl->lookupTransform(targetFrame, armReachOriginFrame, ros::Time(), armreachTransform);
+
+
+                armreachTransform.getOrigin().setZ(0);
+
+                br.sendTransform(
+                    tf::StampedTransform(robot_reference2target, 
+                                        ros::Time::now(), 
+                                        armReachFrame,
+                                        targetFrame));
+
+            }
         }
 
         ros::spinOnce();
