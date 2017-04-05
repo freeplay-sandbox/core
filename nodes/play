@@ -18,8 +18,6 @@ GAME_ACTIONS=[ANIMAL_PLACEMENT, BLOCK_PLACEMENT]
 
 MAP_HEIGHT=0.335
 
-ARM_REACH=0.4 #in meters, calculated from /Head
-
 REFERENCE_FRAME="/sandtray"
 
 BLOCKS_SLOTS=[(0.358,-0.259),(0.098,-0.160),(0.431,-0.198),(0.537,-0.316),(0.435,-0.015),(0.510,-0.121),(0.121,-0.019),(0.519,-0.222),(0.213,-0.189),(0.261,-0.171),(0.439,-0.063),(0.296,-0.204),(0.177,-0.309),(0.087,-0.318),(0.477,-0.197),(0.084,-0.102),(0.188,-0.261),(0.138,-0.187),(0.535,-0.268),(0.133,-0.328),(0.388,-0.222),(0.562,-0.125),(0.039,-0.087),(0.052,-0.161),(0.025,-0.199),(0.026,-0.244),(0.223,-0.243),(0.361,-0.309),(0.117,-0.063),(0.278,-0.248),(0.178,-0.215),(0.042,-0.298),(0.465,-0.102)]
@@ -49,29 +47,30 @@ def on_zones_received(msg):
 
     rospy.loginfo("Randomizing the habitats of the animals. Currently: %s" % HABITATS)
 
-def get_pose(item):
+def get_pose(item, reference=REFERENCE_FRAME):
 
     if item not in tl.getFrameStrings():
         rospy.logwarn_throttle(20,"%s is not yet published." % item)
         return None
 
-    if tl.canTransform(REFERENCE_FRAME, item, rospy.Time(0)):
-        (trans,rot) = tl.lookupTransform(REFERENCE_FRAME, item, rospy.Time(0))
+    if tl.canTransform(reference, item, rospy.Time(0)):
+        (trans,rot) = tl.lookupTransform(reference, item, rospy.Time(0))
     else:
         return None
 
-    return trans[0], trans[1]
+    return trans
 
-def distance_to_robot(pose):
+def reachable(pose):
     """
-    Returns the distance between the robot head (TF frame /Head) and a 3D pose.
-    If the head pose is not available, returns 0.
+    Check whether a given pose is reachable by the robot.
+    If the 'arm_reach' frame is not available, returns 0.
     """
-    robot = get_pose("Head")
-    if robot is None:
+    arm_reach = get_pose(ARM_REACH_FRAME)
+    if arm_reach is None:
         return 0
+    x,y,z = arm_reach
 
-    return dist(robot, pose)
+    return dist((x,y), pose) < z # by convention, 'z' is the radius of the reachable zone at sandtray's level
 
 
 def update_blocks_poses():
@@ -105,7 +104,7 @@ def get_empty_slot(close_to=None):
 
     for slot in slots:
 
-        if distance_to_robot(slot) > ARM_REACH:
+        if not reachable(slot):
             continue
 
         slot_occupied=False
@@ -130,7 +129,7 @@ def find_closest_block(p):
     for k, v in blocks_positions.items():
 
         # block out of reach	
-        if distance_to_robot((v[0], v[1])) > ARM_REACH:
+        if not reachable((v[0], v[1])):
             continue
 
         if v[2]: # the block is already on a slot
@@ -211,11 +210,11 @@ def get_point_in_zone(zone, closeto=None):
     for c in candidates:
         if closeto:
             d = dist(c, closeto)
-            if d < best_dist and distance_to_robot(c) < ARM_REACH:
+            if d < best_dist and reachable(c):
                 best_dist = d
                 best_candidate = Point(x=c[0], y=c[1])
         else:
-            if distance_to_robot(d) < ARM_REACH:
+            if reachable(d):
                 return Point(x=c[0], y=c[1])
 
     return best_candidate
@@ -230,9 +229,10 @@ def place_random_animal():
         pose = get_pose(animal)
         if pose is None: # frame not published yet!
             continue
+        pose = pose[0], pose[1]
 
         # animal out of reach
-        if distance_to_robot(pose) > ARM_REACH:
+        if not reachable(pose):
             continue
 
         if animal not in HABITATS:
@@ -290,7 +290,7 @@ def place_block(close_to=None):
 if __name__ == "__main__":
 
     rospy.init_node('sandbox_player')
-    ARM_REACH = rospy.get_param('~arm_reach',0.4)
+    ARM_REACH_FRAME = rospy.get_param('~arm_reach_frame', "arm_reach")
 
     rospy.loginfo("Initializing TF...")
     tl = tf.TransformListener()
@@ -302,7 +302,7 @@ if __name__ == "__main__":
     motion = actionlib.SimpleActionClient('move_sandbox_items', freeplay_sandbox_msgs.msg.PlaygroundNavigationAction)
     motion.wait_for_server()
 
-    rospy.loginfo("Ready to play! My arm span is " + str(ARM_REACH) + "m (from my head)")
+    rospy.loginfo("Ready to play!")
 
     last_pose=None
     action_idx=0
