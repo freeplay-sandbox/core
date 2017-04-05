@@ -134,6 +134,10 @@ int main(int argc, char* argv[])
     
 
     ROS_INFO_STREAM("sandtray_localisation is ready. " << robotReferenceFrame << " -> sandtray transformation will be published/updated on TF when localisation is triggered on " << signalingTopic);
+    if(broadcastArmReach) {
+        ROS_INFO_STREAM("sandtray_localisation will broadcast as well arm reach information."
+			"Arm reach is set at " << armReach << "m from " << armReachOriginFrame);
+    }
     
 
     ros::Rate r(10);
@@ -147,19 +151,28 @@ int main(int argc, char* argv[])
                                      robotReferenceFrame,
                                      targetFrame));
 
-            if(broadcastArmReach) {
+            if(broadcastArmReach && tl->canTransform(targetFrame, armReachOriginFrame, ros::Time())) {
                 tf::StampedTransform armreachTransform;
 
                 tl->lookupTransform(targetFrame, armReachOriginFrame, ros::Time(), armreachTransform);
 
 
-                armreachTransform.getOrigin().setZ(0);
+                auto z = armreachTransform.getOrigin().getZ();
+                if (z > armReach) {
+                    ROS_WARN_THROTTLE(10, "Too high! distance from shoulder to sandtray > arm reach");
+		}
+                else {
+                   // set the z value of the transform to the radius of arm reach at the
+                   // level of the sandtray
+                   armreachTransform.getOrigin().setZ(sqrt(armReach*armReach - z * z));
+                    
 
-                br.sendTransform(
-                    tf::StampedTransform(robot_reference2target, 
-                                        ros::Time::now(), 
-                                        armReachFrame,
-                                        targetFrame));
+                   br.sendTransform(
+                        tf::StampedTransform(armreachTransform, 
+                                            ros::Time::now(), 
+                                            targetFrame,
+                                            armReachFrame));
+                }
 
             }
         }

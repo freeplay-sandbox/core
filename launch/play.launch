@@ -30,6 +30,7 @@
 
     <group if="$(arg with_marker_localisation)">
         <node pkg="freeplay_sandbox" type="sandtray_localisation" name="sandtray_localisation" output="screen">
+            <param name="broadcast_arm_reach" value="true" />
             <remap from="/image" to="$(arg image)" />
         </node>
     </group>
