@@ -14,6 +14,9 @@ import rospy
 import tf
 import motion
 import numpy
+import math
+
+TO_RAD = math.pi / 180
 
 # masks for which axes naoqi is to control with its planning
 axisMask=motion.AXIS_MASK_VEL
@@ -21,9 +24,18 @@ axisMask=motion.AXIS_MASK_VEL
 
 HEAD_FRAME="Head"
 
+NAO_ARM_LENGTH=0.105 #m -> lenght of the link RBicep, from URDF
+NAO_FOREARM_LENGTH=0.11 #m -> approx. lenght of forearm + half hand
+
+# See
+# http://doc.aldebaran.com/1-14/family/robots/joints_robot.html#robot-joints-v4-left-arm-joints
+NAO_RSHOULDER_ANGLE_LIMITS = [-76 * TO_RAD, 18 * TO_RAD]
+NAO_RELBOW_ANGLE_LIMITS = [2 * TO_RAD, 88.5 * TO_RAD]
+
 tl = None
 
-def clip(v, vmin, vmax):
+def clamp(v, limits):
+    vmin, vmax = limits
     return max(min(v, vmax), vmin)
 
 
@@ -44,8 +56,8 @@ def xyz2pantilt(pose, headframe=HEAD_FRAME):
 
 def look_at(pose):
     yaw, pitch = xyz2pantilt(pose)
-    yaw = clip(yaw, -2.0857, 2.0857)
-    pitch = clip(-pitch, -0.6720, 0.5149) #beware the '-pitch'!
+    yaw = clamp(yaw, (-2.0857, 2.0857))
+    pitch = clamp(-pitch, (-0.6720, 0.5149)) #beware the '-pitch'!
 
     if abs(yaw) < 0.01 and abs(pitch) < 0.01:
        return
@@ -56,11 +68,96 @@ def look_at(pose):
     rospy.loginfo("Moving head by: pan: %s, tilt: %s at %s%% of speed" % (yaw, pitch, speed * 100))
     motionProxy.changeAngles(joints, [yaw, pitch], speed) # non-blocking
 
+
+def arm_ik(pose, reference_frame="RShoulder"):
+    """
+    Returns (shoulder_joint, elbow_joint) such as the arm points towards the
+    target (x,y). We make a simple 2D approximation.
+
+
+     X target ^
+      \  (x,y)|    O
+       \      |     \l2
+        \     |      \  elbow_joint
+         \    |       O
+          \   |      /
+          `.  |     /l1
+           |  |   ,'
+            \ |  /
+             \| / shoulder_joint
+              O:............>
+    """
+
+    targetpose.header.stamp = tl.getLatestCommonTime(targetpose.header.frame_id,reference_frame)
+    pose = tl.transformPose(reference_frame, targetpose)
+
+    x = pose.pose.position.x
+    y = pose.pose.position.y
+
+
+    l1=NAO_ARM_LENGTH
+    l2=NAO_FOREARM_LENGTH
+
+    if x == 0 and y == 0:
+        return None
+    if y < 0: # do not allow gestures *behind* the robot
+        return None
+
+    if (math.sqrt(x*x + y*y) > l1+l2):
+        return math.atan2(y,x),0.0
+
+    # planar solution of the Inverse Kinematic problem
+    elbow_angle = math.acos((x*x + y*y - l1*l1 - l2*l2)/(2*l1*l2))
+    shoulder_angle = math.asin(y/math.sqrt(x*x + y*y)) - math.asin(l2 *
+                                 math.sin(elbow_angle)/math.sqrt(x*x + y*y))
+
+
+    return clamp(shoulder_angle, NAO_RSHOULDER_ANGLE_LIMITS),clamp(elbow_angle.NAO_RELBOW_ANGLE_LIMITS)
+
+
+
 def point_at(targetpose):
-    targetpose.header.stamp = tl.getLatestCommonTime(targetpose.header.frame_id, "base_footprint")
-    #targetpose.pose.position.z += 0.1 # points 10cm above sandtray
-    pose = tl.transformPose("base_footprint", targetpose)
-    motionProxy.wbSetEffectorControl(effector, [pose.pose.position.x, pose.pose.position.y, pose.pose.position.z])
+    shoulder, elbow = arm_ik(targetpose)
+
+    names  = ["RShoulderRoll",
+              "RElbowRoll"]
+    angles  = [shoulder, elbow]
+    fractionMaxSpeed  = 0.2
+    motionProxy.setAngles(names, angles, fractionMaxSpeed)
+
+def set_pointing_posture():
+
+    names  = ["RShoulderRoll",
+              "RShoulderPitch", 
+              "RElbowRoll", 
+              "RElbowYaw",
+              "RWristYaw"]
+    angleLists  = [[-10 * TO_RAD, -75 * TO_RAD, -75 * TO_RAD, -35 * TO_RAD],
+                   [70 * TO_RAD, 70 * TO_RAD, 0],
+                   [2 * TO_RAD, 2 * TO_RAD, 60 * TO_RAD],
+                   [0 * TO_RAD],
+                   [90 * TO_RAD]]
+    timeLists   = [[1.0, 3.0,4.0,5.0],
+                   [1.0, 3.0, 4.0],
+                   [1.0,4.0,5.0],
+                   [1.0],
+                   [1.0]]
+    isAbsolute  = True
+    motionProxy.angleInterpolation(names, angleLists, timeLists, isAbsolute)
+
+def arm_to_rest_posture():
+
+    names  = ["RShoulderRoll",
+              "RShoulderPitch", 
+              "RElbowRoll"]
+    angleLists  = [[-75 * TO_RAD, -75 * TO_RAD, -10 * TO_RAD],
+                   [0, 70 * TO_RAD],
+                   [2 * TO_RAD]]
+    timeLists   = [[1.0, 3.0, 5.0],
+                   [1.0, 3.0],
+                   [1.5]]
+    isAbsolute  = True
+    motionProxy.angleInterpolation(names, angleLists, timeLists, isAbsolute)
 
 def on_traj(traj):
     global tl
@@ -132,6 +229,7 @@ class FallResponder(ALModule):
       rospy.loginfo("Stopped task");
       
 if __name__ == "__main__":
+
     rospy.init_node("nao_playground_behaviours");
     
     TRAJ_TOPIC = rospy.get_param('~trajectory_input_topic','/playground_manipulation_path')    
@@ -168,13 +266,15 @@ if __name__ == "__main__":
     motionProxy.wakeUp()
     postureProxy.goToPosture("StandInit", 0.5)
 
+    set_pointing_posture()
+
     motionProxy.wbEnableEffectorControl(effector,True);
     rospy.sleep(2)
 
     tl = tf.TransformListener()
 
     ### Check the robot is launched and properly localised wrt the sandtray
-    while True:
+    while not rospy.is_shutdown():
         if not tl.frameExists("/base_footprint"):
             rospy.logwarn("Waiting for frame /base_footprint to be published...")
         else:
@@ -192,25 +292,26 @@ if __name__ == "__main__":
         rospy.sleep(0.5)
 
 
-    sub_traj = rospy.Subscriber(TRAJ_TOPIC, Path, on_traj)
+    #sub_traj = rospy.Subscriber(TRAJ_TOPIC, Path, on_traj)
 
     r = rospy.Rate(2)
 
     while not rospy.is_shutdown():
         try:
             t = tl.getLatestCommonTime(HEAD_FRAME, "robot_focus")
-      	    if tl.canTransform(HEAD_FRAME, "robot_focus",t):
-	        robot_focus = PoseStamped()
-	        robot_focus.header.stamp = rospy.Time.now()
-	        robot_focus.header.frame_id = "robot_focus"
-	        look_at(robot_focus)
-	        #point_at(robot_focus)
+            if tl.canTransform(HEAD_FRAME, "robot_focus",t):
+                robot_focus = PoseStamped()
+                robot_focus.header.stamp = rospy.Time.now()
+                robot_focus.header.frame_id = "robot_focus"
+                look_at(robot_focus)
+                point_at(robot_focus)
         except: # most likely, robot_focus is not published. That's ok, don't track it then
             pass
 
         r.sleep()
 
 
+    arm_to_rest_posture()
     motionProxy.rest()
 
     myBroker.shutdown()
