@@ -65,16 +65,16 @@ def look_at(pose):
     joints = ['HeadYaw','HeadPitch']
     #motionProxy.angleInterpolationWithSpeed(joints, [yaw, pitch], 0.1) # blocking
     speed = 0.1 if abs(yaw) > 0.1 else max(0.005, abs(yaw)) # adapt the speed to the distance to move
-    rospy.loginfo("Moving head by: pan: %s, tilt: %s at %s%% of speed" % (yaw, pitch, speed * 100))
+    rospy.logdebug("Moving head by: pan: %s, tilt: %s at %s%% of speed" % (yaw, pitch, speed * 100))
     motionProxy.changeAngles(joints, [yaw, pitch], speed) # non-blocking
 
 
-def arm_ik(pose, reference_frame="RShoulder"):
+def arm_ik(targetpose, reference_frame="RShoulder"):
     """
     Returns (shoulder_joint, elbow_joint) such as the arm points towards the
     target (x,y). We make a simple 2D approximation.
 
-
+              Y
      X target ^
       \  (x,y)|    O
        \      |     \l2
@@ -85,44 +85,55 @@ def arm_ik(pose, reference_frame="RShoulder"):
            |  |   ,'
             \ |  /
              \| / shoulder_joint
-              O:............>
+              O:............> X
     """
 
     targetpose.header.stamp = tl.getLatestCommonTime(targetpose.header.frame_id,reference_frame)
     pose = tl.transformPose(reference_frame, targetpose)
 
-    x = pose.pose.position.x
-    y = pose.pose.position.y
+    # rotate the shoulder frame: on the robot, X points forward, on the drawing above, X points right
+    x = -pose.pose.position.y
+    y = pose.pose.position.x
 
 
     l1=NAO_ARM_LENGTH
     l2=NAO_FOREARM_LENGTH
 
+    rospy.logwarn("Target at (%s,%s) from %s" % (x,y,reference_frame))
     if x == 0 and y == 0:
         return None
     if y < 0: # do not allow gestures *behind* the robot
         return None
 
     if (math.sqrt(x*x + y*y) > l1+l2):
-        return math.atan2(y,x),0.0
+        shoulder_angle = -math.pi/2 + math.atan2(y,x)
+        elbow_angle = 0.0
+        if shoulder_angle > NAO_RSHOULDER_ANGLE_LIMITS[1]:
+            elbow_angle = shoulder_angle
 
-    # planar solution of the Inverse Kinematic problem
-    elbow_angle = math.acos((x*x + y*y - l1*l1 - l2*l2)/(2*l1*l2))
-    shoulder_angle = math.asin(y/math.sqrt(x*x + y*y)) - math.asin(l2 *
-                                 math.sin(elbow_angle)/math.sqrt(x*x + y*y))
+    else:
+        # planar solution of the Inverse Kinematic problem
+        elbow_angle = math.acos((x*x + y*y - l1*l1 - l2*l2)/(2*l1*l2))
+    
+        # note: -pi/2 comes from the orientation of Nao's joint (-> angle = 0 <=> arm pointing forward)
+        shoulder_angle = -math.pi/2 + math.asin(y/math.sqrt(x*x + y*y)) - math.asin(l2 *
+                                                math.sin(elbow_angle)/math.sqrt(x*x + y*y))
+    
 
-
-    return clamp(shoulder_angle, NAO_RSHOULDER_ANGLE_LIMITS),clamp(elbow_angle.NAO_RELBOW_ANGLE_LIMITS)
+    return clamp(shoulder_angle, NAO_RSHOULDER_ANGLE_LIMITS),clamp(elbow_angle,NAO_RELBOW_ANGLE_LIMITS)
 
 
 
 def point_at(targetpose):
-    shoulder, elbow = arm_ik(targetpose)
+    angles = arm_ik(targetpose)
+
+    if angles is None:
+        return
 
     names  = ["RShoulderRoll",
               "RElbowRoll"]
-    angles  = [shoulder, elbow]
-    fractionMaxSpeed  = 0.2
+    rospy.logwarn("Moving shoulder, elbow: %s" % str([angles[0]/TO_RAD, angles[1]/TO_RAD]))
+    fractionMaxSpeed  = 0.3
     motionProxy.setAngles(names, angles, fractionMaxSpeed)
 
 def set_pointing_posture():
@@ -133,7 +144,7 @@ def set_pointing_posture():
               "RElbowYaw",
               "RWristYaw"]
     angleLists  = [[-10 * TO_RAD, -75 * TO_RAD, -75 * TO_RAD, -35 * TO_RAD],
-                   [70 * TO_RAD, 70 * TO_RAD, 0],
+                   [70 * TO_RAD, 70 * TO_RAD, 10 * TO_RAD],
                    [2 * TO_RAD, 2 * TO_RAD, 60 * TO_RAD],
                    [0 * TO_RAD],
                    [90 * TO_RAD]]
@@ -151,7 +162,7 @@ def arm_to_rest_posture():
               "RShoulderPitch", 
               "RElbowRoll"]
     angleLists  = [[-75 * TO_RAD, -75 * TO_RAD, -10 * TO_RAD],
-                   [0, 70 * TO_RAD],
+                   [10 * TO_RAD, 70 * TO_RAD],
                    [2 * TO_RAD]]
     timeLists   = [[1.0, 3.0, 5.0],
                    [1.0, 3.0],
@@ -275,12 +286,12 @@ if __name__ == "__main__":
 
     ### Check the robot is launched and properly localised wrt the sandtray
     while not rospy.is_shutdown():
-        if not tl.frameExists("/base_footprint"):
-            rospy.logwarn("Waiting for frame /base_footprint to be published...")
+        if not tl.frameExists("/odom"):
+            rospy.logwarn("Waiting for frame /odom to be published...")
         else:
             try:
-                t = tl.getLatestCommonTime("base_footprint", "sandtray")
-      	        if tl.canTransform("base_footprint", "sandtray",t):
+                t = tl.getLatestCommonTime("odom", "sandtray")
+      	        if tl.canTransform("odom", "sandtray",t):
                     rospy.loginfo("Ok! Starting robot behaviours.")
                     pub_speech.publish(String("Ready to go!"))
                     break
