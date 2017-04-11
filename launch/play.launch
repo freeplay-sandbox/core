@@ -20,7 +20,7 @@
         </include>
 
 
-        <node pkg="freeplay_sandbox" type="nao_behaviours" name="nao_behaviours">
+        <node pkg="freeplay_sandbox" type="nao_behaviours" name="nao_behaviours" output="screen">
             <param name="nao_ip"            value="$(arg nao_ip)" />
         </node>
     </group>
