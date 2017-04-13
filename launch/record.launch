@@ -31,6 +31,6 @@
 
      <node pkg="rosbag" type="record" name="rosbag_record_freeplay_sandbox"
          args="-o freeplay-sandbox $(arg topics) --duration=$(arg duration)"
-         output="screen" />
+         output="screen" required="true" />
 
 </launch>

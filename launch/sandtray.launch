@@ -9,7 +9,7 @@
                                                 camera2:=$(arg camera2)
                                                 env_camera:=$(arg env_camera)" />
 
-    <node pkg="robot_state_publisher" type="robot_state_publisher" name="sandtray_publisher" >
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="sandtray_publisher" required="true" >
         <param name="use_tf_static" value="false" /> <!-- dynamically publish the frames, for better rosbag behaviour -->
         <remap from="robot_description" to="sandtray_description" />
         <remap from="joint_states" to="no_joint_states" />

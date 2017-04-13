@@ -88,10 +88,10 @@
     </group>
 
 
-    <node  if="$(arg loop)" pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox"
+    <node  if="$(arg loop)" pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox" required="true"
         args="--loop $(arg bag) --start $(arg start)"
         output="screen" />
-    <node  unless="$(arg loop)" pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox"
+    <node  unless="$(arg loop)" pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox" required="true"
         args="--keep-alive $(arg bag) --start $(arg start)"
         output="screen" />
 
