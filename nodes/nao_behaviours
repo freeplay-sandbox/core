@@ -37,6 +37,8 @@ tl = None
 
 is_tracking_focus = False
 
+last_pose = None
+
 def clamp(v, limits):
     vmin, vmax = limits
     return max(min(v, vmax), vmin)
@@ -182,8 +184,8 @@ def arm_between_pointing_posture():
     isAbsolute  = True
     motionProxy.angleInterpolation(names, angleLists, timeLists, isAbsolute)
 
-def on_traj(traj):
-    global tl
+def on_pose(pose):
+    global last_pose
 
     if is_tracking_focus:
         rospy.logwarn("Received a path, but Nao is going to ignore it as it currently track the ' robot focus'")
@@ -197,29 +199,14 @@ def on_traj(traj):
         #    motionProxy.openHand("RHand");
         #    roll = 1.7; #rotate wrist to the right (about the x axis, w.r.t. robot frame)
 
-        rospy.loginfo("Received trajectory to act on the robot! As requested, waiting " + str((traj.header.stamp-rospy.Time.now()).to_sec()) + "s before starting...")
+        point_at(pose)
+        look_at(pose)
+        
+        last_pose = rospy.Time.now()
 
-        #wait until time instructed to start executing
-        rospy.sleep(traj.header.stamp-rospy.Time.now());
-
-        rospy.loginfo("Waiting a bit more (" + str(traj.poses[0].header.stamp.to_sec()) + "s) to give the robot time to prepare...")
-        #wait for robot to get to starting point
-        rospy.sleep(traj.poses[0].header.stamp.to_sec()); 
-
-
-        rospy.loginfo("Starting to play trajectory on the robot!")
-       
-        for i, pose in enumerate(traj.poses):
-
-            point_at(pose)
-            look_at(pose)
-            if i < len(traj.poses) - 1:
-                rospy.sleep(traj.poses[i+1].header.stamp - pose.header.stamp)
-
-        arm_between_pointing_posture()
 
     else:
-        rospy.loginfo("Got traj but not allowed to execute it because I've fallen");
+        rospy.loginfo("Got pose to look at, but I've fallen!");
 
 class FallResponder(ALModule):
   """ Module to react to robotHasFallen events """
@@ -239,7 +226,7 @@ if __name__ == "__main__":
 
     rospy.init_node("nao_playground_behaviours");
     
-    TRAJ_TOPIC = rospy.get_param('~trajectory_input_topic','/playground_manipulation_path')    
+    POSES_TOPIC = rospy.get_param('~poses_output_topic','poses')
     NAO_IP = rospy.get_param('~nao_ip','127.0.0.1'); #default behaviour is 
                                         #to connect to simulator locally
     NAO_HANDEDNESS = rospy.get_param('~nao_handedness','right')
@@ -275,7 +262,7 @@ if __name__ == "__main__":
 
     set_pointing_posture()
 
-    motionProxy.wbEnableEffectorControl(effector,True);
+    #motionProxy.wbEnableEffectorControl(effector,True);
     rospy.sleep(2)
 
     tl = tf.TransformListener()
@@ -298,8 +285,7 @@ if __name__ == "__main__":
 
         rospy.sleep(0.5)
 
-
-    sub_traj = rospy.Subscriber(TRAJ_TOPIC, Path, on_traj)
+    sub_poses = rospy.Subscriber(POSES_TOPIC, PoseStamped, on_pose)
 
     r = rospy.Rate(2)
 
@@ -318,6 +304,10 @@ if __name__ == "__main__":
         except Exception as e: # most likely, robot_focus is not published. That's ok, don't track it then
             is_tracking_focus = False
             pass
+
+
+        if last_pose and (rospy.Time.now() - last_pose).to_sec() > 2:
+		arm_between_pointing_posture()
 
         r.sleep()
 
