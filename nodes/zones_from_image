@@ -20,11 +20,13 @@ REFERENCE_FRAME="/sandtray"
 
 bridge = CvBridge()
 
+
 def publish_zones(zones, scale=1):
 
     rospy.loginfo("Publishing the detected zones on /zones")
 
     markers = MarkerArray()
+    markers.markers.append(DELETEALL_MARKER)
 
     zone_id=0
     for zone, color in zones:
@@ -154,6 +156,11 @@ if __name__ == '__main__':
 
         sys.exit(0)
     rospy.init_node('zones_from_image')
+
+    DELETEALL_MARKER = Marker()
+    DELETEALL_MARKER.header.frame_id = REFERENCE_FRAME
+    DELETEALL_MARKER.header.stamp = rospy.Time.now()
+    DELETEALL_MARKER.action = Marker.DELETEALL
 
     pub_markers = rospy.Publisher("zones", MarkerArray, queue_size=5, latch=True);
 
