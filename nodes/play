@@ -33,7 +33,15 @@ EPSILON_TO_BLOCK_SLOT=0.02
 blocks_positions={}
 
 ANIMALS = ["zebra","elephant","leopard","lion","giraffe","rhino","crocodile","hippo"]
-HABITATS = {}
+HABITATS = {"zebra": ["yellow", "green"],
+            "elephant": ["green"],
+            "leopard": ["yellow"],
+            "lion": ["yellow"],
+            "giraffe": ["yellow", "green"],
+            "rhino": ["green"],
+            "crocodile": ["blue"],
+            "hippo": ["blue"]
+            }
 
 
 tl=None
@@ -43,14 +51,14 @@ zoneslock = Lock()
 def on_zones_received(msg):
 
     zoneslock.acquire()
+
+    ZONES.clear()
     for m in msg.markers:
-        ZONES.setdefault(m.ns, []).append([(p.x,p.y) for p in m.points])
+        if m.action == Marker.ADD:
+            name = m.ns.split("_")[-1]
+            rospy.loginfo("Adding/updating a %s zone" % name)
+            ZONES.setdefault(name, []).append([(p.x,p.y) for p in m.points])
 
-    # Randomize the initial animals habitats
-    for k in ANIMALS:
-        HABITATS[k] = random.choice(ZONES.keys())
-
-    rospy.loginfo("Randomizing the habitats of the animals. Currently: %s" % HABITATS)
     zoneslock.release()
 
 def get_pose(item, reference=REFERENCE_FRAME):
@@ -244,12 +252,21 @@ def place_random_animal():
         if animal not in HABITATS:
             continue
 
-        zone = HABITATS[animal]
+        zones = HABITATS[animal]
+        zones_poly = []
 
-        if not isin(pose, ZONES[zone]):
+        zoneslock.acquire()
+
+        for zone in zones:
+            zones_poly += ZONES[zone]
+
+        zoneslock.release()
+
+
+        if not isin(pose, zones_poly):
 
             zoneslock.acquire()
-            target=get_point_in_zone(zone, closeto=pose)
+            target=get_point_in_zone(random.choice(zones), closeto=pose)
             zoneslock.release()
 
             # maybe the zone is not reachable?
