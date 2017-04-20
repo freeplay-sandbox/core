@@ -20,6 +20,14 @@ REFERENCE_FRAME="/sandtray"
 
 bridge = CvBridge()
 
+COLORS= { "black":  (np.array([0,0,0]), np.array([255,60,70])),
+          "white":  (np.array([0,0,180]), np.array([255,60,255])),
+          "purple": (np.array([120,0,70]), np.array([255,255,230])),
+          "blue":   (np.array([70,0,70]), np.array([130,255,230])),
+          "green":  (np.array([40,0,70]), np.array([70,255,230])),
+          "yellow": (np.array([1,100,0]), np.array([40,255,255])),
+          "red":    (np.array([0,120,70]), np.array([10,255,255]))
+        }
 
 def publish_zones(zones, scale=1):
 
@@ -28,15 +36,14 @@ def publish_zones(zones, scale=1):
     markers = MarkerArray()
     markers.markers.append(DELETEALL_MARKER)
 
-    zone_id=0
-    for zone, color in zones:
+    for name, zone, color in zones:
 
         rgb = matplotlib.colors.hsv_to_rgb(color/255.)
 
         marker = Marker()
         marker.header.frame_id = REFERENCE_FRAME
         marker.header.stamp = rospy.Time.now()
-        marker.ns = "sandbox_zone_%s" % zone_id
+        marker.ns = "sandbox_zone_%s" % name
         marker.action = Marker.ADD
         marker.pose.orientation.w = 1.0
 
@@ -61,8 +68,6 @@ def publish_zones(zones, scale=1):
             marker.points.append(startpoint)
 
             markers.markers.append(deepcopy(marker))
-
-        zone_id +=1
 
     pub_markers.publish(markers)
 
@@ -101,32 +106,15 @@ def process(img):
     fx = float(DOWNSCALE_SIZE)/hsv.shape[:2][1]
     hsv=cv2.resize(hsv,None, fx=fx,fy=fx)
 
-    lower_blue = np.array([70,0,0])
-    upper_blue = np.array([130,255,255])
-    blue_mask = mask_color(hsv, lower_blue, upper_blue)
-    #res_blue = cv2.bitwise_and(img,img, mask=blue_mask)
+    contours = []
+
+    for col, bounds in COLORS.items():
+        mask = mask_color(hsv, bounds[0], bounds[1])
+        contours.append((col, get_contours(mask,fx), (bounds[0] + bounds[1]) / 2))
+        #res = cv2.bitwise_and(img,img, mask=mask)
 
 
-    lower_green = np.array([40,0,0])
-    upper_green = np.array([70,255,255])
-    green_mask = mask_color(hsv, lower_green, upper_green)
-    #res_green = cv2.bitwise_and(img,img, mask=green_mask)
-
-    lower_yellow = np.array([1,0,0])
-    upper_yellow = np.array([40,255,255])
-    yellow_mask = mask_color(hsv, lower_yellow, upper_yellow)
-    #res_yellow = cv2.bitwise_and(img,img, mask=yellow_mask)
-
-    lower_red = np.array([0,120,0])
-    upper_red = np.array([10,255,255])
-    red_mask = mask_color(hsv, lower_red, upper_red)
-    #res_red = cv2.bitwise_and(img,img, mask=red_mask)
-
-
-    return [(get_contours(blue_mask,fx), lower_blue + upper_blue / 2),
-            (get_contours(green_mask,fx), lower_green + upper_green / 2),
-            (get_contours(yellow_mask,fx), lower_yellow + upper_yellow / 2),
-            (get_contours(red_mask,fx), lower_red + upper_red / 2)]
+    return contours
 
 def image_callback(msg,camera_info):
     rospy.loginfo("Received the playground image. Detecting zones...")
@@ -148,8 +136,10 @@ if __name__ == '__main__':
 
         contours = process(img)
 
-        for c in contours:
-            cv2.drawContours(img, c, -1, (128,0,0), 2)
+        for name, c, col in contours:
+            rgb = [int(x * 255) for x in matplotlib.colors.hsv_to_rgb(col/255.)]
+            print("%s: %s" % (name, str(rgb)))
+            cv2.drawContours(img, c, -1, [rgb[2],rgb[1],rgb[0]], 2)
 
         cv2.imshow('playground', img)
         cv2.waitKey(0)
