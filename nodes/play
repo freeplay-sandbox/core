@@ -6,6 +6,8 @@ import math
 import rospy
 import tf
 
+from threading import Lock
+
 import actionlib
 
 from geometry_msgs.msg import PoseStamped, Point
@@ -36,8 +38,11 @@ HABITATS = {}
 
 tl=None
 
+zoneslock = Lock()
+
 def on_zones_received(msg):
 
+    zoneslock.acquire()
     for m in msg.markers:
         ZONES.setdefault(m.ns, []).append([(p.x,p.y) for p in m.points])
 
@@ -46,6 +51,7 @@ def on_zones_received(msg):
         HABITATS[k] = random.choice(ZONES.keys())
 
     rospy.loginfo("Randomizing the habitats of the animals. Currently: %s" % HABITATS)
+    zoneslock.release()
 
 def get_pose(item, reference=REFERENCE_FRAME):
 
@@ -242,7 +248,9 @@ def place_random_animal():
 
         if not isin(pose, ZONES[zone]):
 
+            zoneslock.acquire()
             target=get_point_in_zone(zone, closeto=pose)
+            zoneslock.release()
 
             # maybe the zone is not reachable?
             if not target:
