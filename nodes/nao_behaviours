@@ -236,7 +236,7 @@ class FallResponder(ALModule):
       
 if __name__ == "__main__":
 
-    rospy.init_node("nao_playground_behaviours");
+    rospy.init_node("nao_behaviours");
     
     POSES_TOPIC = rospy.get_param('~poses_output_topic','poses')
     NAO_IP = rospy.get_param('~nao_ip','127.0.0.1'); #default behaviour is 
