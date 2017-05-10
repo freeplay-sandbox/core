@@ -15,9 +15,8 @@ from geometry_msgs.msg import PoseStamped, Point
 from visualization_msgs.msg import MarkerArray, Marker
 import freeplay_sandbox_msgs.msg
 
-ANIMAL_PLACEMENT=0
-BLOCK_PLACEMENT=1
-GAME_ACTIONS=[ANIMAL_PLACEMENT, BLOCK_PLACEMENT]
+ITEM_PLACEMENT=0
+GAME_ACTIONS=[ITEM_PLACEMENT]
 
 MAP_HEIGHT=0.335
 
@@ -33,15 +32,17 @@ EPSILON_TO_BLOCK_SLOT=0.02
 # hold: cube_XX: (x,y,on_slot[bool])
 blocks_positions={}
 
-ANIMALS = ["zebra","elephant","leopard","lion","giraffe","rhino","crocodile","hippo"]
+ITEMS = ["zebra","elephant","ball","lion","giraffe","caravan","crocodile","hippo", "boy", "girl"]
 HABITATS = {"zebra": ["yellow", "green"],
             "elephant": ["green"],
-            "leopard": ["yellow"],
             "lion": ["yellow"],
             "giraffe": ["yellow", "green"],
-            "rhino": ["green"],
             "crocodile": ["blue"],
-            "hippo": ["blue"]
+            "hippo": ["blue"],
+            "ball": ["yellow", "green", "purple", "white"],
+            "caravan": ["yellow", "green", "purple", "white"],
+            "boy": ["yellow", "green", "purple", "white"],
+            "girl": ["yellow", "green", "purple", "white"]
             }
 
 
@@ -242,32 +243,33 @@ def get_point_in_zone(zone, closeto=None):
 
     return best_candidate
 
-def place_random_animal():
+def place_random_item():
 
-    # randomize the list of animals
-    animals = random.sample(ANIMALS, len(ANIMALS))
+    # randomize the list of items
+    items = random.sample(ITEMS, len(ITEMS))
 
-    for animal in animals:
+    for item in items:
 
-        pose = get_pose(animal)
+        pose = get_pose(item)
         if pose is None: # frame not published yet!
             continue
         pose = pose[0], pose[1]
 
-        # animal out of reach
+        # item out of reach
         if not reachable(pose):
             continue
 
-        if animal not in HABITATS:
+        if item not in HABITATS:
             continue
 
-        zones = HABITATS[animal]
+        zones = HABITATS[item]
         zones_poly = []
 
         zoneslock.acquire()
 
         for zone in zones:
-            zones_poly += ZONES[zone]
+            if zone in ZONES:
+                zones_poly += ZONES[zone]
 
         zoneslock.release()
 
@@ -282,8 +284,8 @@ def place_random_animal():
             if not target:
                 continue
 
-            rospy.loginfo("Sending %s to %s" % (animal, zone))
-            goal = freeplay_sandbox_msgs.msg.PlaygroundNavigationGoal(item=animal,goal=target)
+            rospy.loginfo("Sending %s to %s" % (item, zone))
+            goal = freeplay_sandbox_msgs.msg.PlaygroundNavigationGoal(item=item,goal=target)
             motion.send_goal(goal)
             motion.wait_for_result()
     
@@ -347,10 +349,8 @@ if __name__ == "__main__":
         if play_enabled:
             current_action = GAME_ACTIONS[action_idx]
 
-            if current_action == ANIMAL_PLACEMENT:
-                ok, last_pose = place_random_animal()
-            elif current_action == BLOCK_PLACEMENT:
-                ok, last_pose = place_block(last_pose)
+            if current_action == ITEM_PLACEMENT:
+                ok, last_pose = place_random_item()
 
             if ok:
                 rospy.sleep(random.uniform(1.2,2.5))
