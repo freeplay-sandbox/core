@@ -1,0 +1,32 @@
+<launch>
+    <arg name="face1"       default="child_purple" />
+    <arg name="face2"       default="child_yellow" />
+
+    <param name="$(arg face1)_description" command="$(find xacro)/xacro.py $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face1)" />
+    <param name="$(arg face2)_description" command="$(find xacro)/xacro.py $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face2)" />
+
+    <arg name="camera1"     default="camera_purple" />
+    <arg name="camera2"     default="camera_yellow" />
+
+    <arg name="image1" default="$(arg camera1)/rgb/image_raw" />
+    <arg name="image2" default="$(arg camera2)/rgb/image_raw" />
+
+    <group ns="$(arg face1)">
+        <node pkg="gazr" type="estimate" name="gazr" required="true">
+            <param name="face_model" value="$(find gazr)/shape_predictor_68_face_landmarks.dat" />
+            <remap from="/image" to="$(arg image1)"/>
+        </node>
+
+        <!--        <node name="estimate_focus" pkg="freeplay_sandbox" type="estimate_focus" output="screen"/> -->
+    </group>
+
+    <group ns="$(arg face2)">
+        <node pkg="gazr" type="estimate" name="gazr" required="true">
+            <param name="face_model" value="$(find gazr)/shape_predictor_68_face_landmarks.dat" />
+            <remap from="/image" to="$(arg image2)"/>
+        </node>
+
+        <!--<node name="estimate_focus" pkg="freeplay_sandbox" type="estimate_focus" output="screen"/>-->
+    </group>
+
+</launch>
