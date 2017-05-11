@@ -8,24 +8,21 @@
     <arg name="camera1"     default="camera_purple" />
     <arg name="camera2"     default="camera_yellow" />
 
-    <arg name="image1" default="/$(arg camera1)/rgb/image_raw" />
-    <arg name="image2" default="/$(arg camera2)/rgb/image_raw" />
-
-    <group ns="$(arg face1)">
+    <group ns="$(arg camera1)">
         <node pkg="gazr" type="estimate" name="gazr" required="true" output="screen">
             <param name="face_model" value="$(find gazr)/shape_predictor_68_face_landmarks.dat" />
             <param name="prefix" value="$(arg face1)" />
-            <remap from="/image" to="$(arg image1)"/>
+            <remap from="image" to="rgb/image_raw"/>
         </node>
 
         <!--        <node name="estimate_focus" pkg="freeplay_sandbox" type="estimate_focus" output="screen"/> -->
     </group>
 
-    <group ns="$(arg face2)">
+    <group ns="$(arg camera2)">
         <node pkg="gazr" type="estimate" name="gazr" required="true" output="screen">
             <param name="face_model" value="$(find gazr)/shape_predictor_68_face_landmarks.dat" />
             <param name="prefix" value="$(arg face2)" />
-            <remap from="/image" to="$(arg image2)"/>
+            <remap from="image" to="rgb/image_raw"/>
         </node>
 
         <!--<node name="estimate_focus" pkg="freeplay_sandbox" type="estimate_focus" output="screen"/>-->
