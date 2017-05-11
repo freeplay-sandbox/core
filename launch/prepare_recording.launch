@@ -2,8 +2,8 @@
      is performed by record.launch
 -->
 <launch>
-    <arg name="camera1"         default="camera_1" />
-    <arg name="camera2"         default="camera_2" />
+    <arg name="camera1"         default="camera_purple" />
+    <arg name="camera2"         default="camera_yellow" />
     <arg name="env_camera"      default="env_camera" />
 
     <include file="$(find freeplay_sandbox)/launch/sandtray.launch" >
