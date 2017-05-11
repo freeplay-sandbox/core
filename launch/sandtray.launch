@@ -1,6 +1,6 @@
 <launch>
-    <arg name="camera1"         default="camera_1" />
-    <arg name="camera2"         default="camera_2" />
+    <arg name="camera1"         default="camera_purple" />
+    <arg name="camera2"         default="camera_yellow" />
     <arg name="env_camera"      default="env_camera" />
 
     <param name="sandtray_description" command="$(find xacro)/xacro --inorder
