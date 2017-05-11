@@ -14,8 +14,8 @@
     <!-- process the sandbox background image to extract possible zones using
          colour-based segmentation -->
     <node pkg="freeplay_sandbox" type="zones_from_image" name="sandbox_zones_from_image" output="screen">
-        <remap from="/image" to="/sandbox/image"/>
-        <remap from="/camera_info" to="/sandbox/camera_info"/>
+        <remap from="/image" to="/sandtray/background/image"/>
+        <remap from="/camera_info" to="/sandtray/background/camera_info"/>
     </node>
 
 </launch>
