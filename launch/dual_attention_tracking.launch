@@ -2,8 +2,8 @@
     <arg name="face1"       default="child_purple" />
     <arg name="face2"       default="child_yellow" />
 
-    <param name="$(arg face1)_description" command="$(find xacro)/xacro.py $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face1)" />
-    <param name="$(arg face2)_description" command="$(find xacro)/xacro.py $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face2)" />
+    <param name="$(arg face1)_description" command="$(find xacro)/xacro --inorder $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face1)" />
+    <param name="$(arg face2)_description" command="$(find xacro)/xacro --inorder $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face2)" />
 
     <arg name="camera1"     default="camera_purple" />
     <arg name="camera2"     default="camera_yellow" />

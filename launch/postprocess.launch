@@ -9,8 +9,8 @@
     <arg name="face1"       default="face_1" />
     <arg name="face2"       default="face_2" />
 
-    <param name="$(arg face1)_description" command="$(find xacro)/xacro.py $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face1)_0" />
-    <param name="$(arg face2)_description" command="$(find xacro)/xacro.py $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face2)_0" />
+    <param name="$(arg face1)_description" command="$(find xacro)/xacro --inorder $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face1)_0" />
+    <param name="$(arg face2)_description" command="$(find xacro)/xacro --inorder $(find freeplay_sandbox)/urdf/face.xacro name:=$(arg face2)_0" />
     <param name="sandtray_description" command="$(find xacro)/xacro --inorder
                                                 $(find freeplay_sandbox)/urdf/sandtray.xacro
                                                 camera1:=$(arg camera1)
