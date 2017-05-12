@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
 
     // load parameters
     string signalingTopic;
-    _private_node.param<string>("signaling_topic", signalingTopic, "visualfocus_calibration");
+    _private_node.param<string>("signaling_topic", signalingTopic, "sandtray/signals/start_visual_tracking_calibration");
 
     _private_node.param<string>("target_frame", targetFrame, "visual_target");
     _private_node.param<string>("gaze_frame", gazeFrame, "gazepose_0");
