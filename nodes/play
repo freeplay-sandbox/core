@@ -359,7 +359,7 @@ if __name__ == "__main__":
 
             chance = random.random()
             if not ok or chance > 0.9:
-                rospy.loginfo("Switching to next game action")
+                #rospy.loginfo("Switching to next game action")
                 action_idx= (action_idx+1) % len(GAME_ACTIONS)
 
         else:
