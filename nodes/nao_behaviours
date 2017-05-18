@@ -319,8 +319,8 @@ if __name__ == "__main__":
             pass
 
 
-        if last_pose and (rospy.Time.now() - last_pose).to_sec() > 2:
-            if (rospy.Time.now() - last_pose).to_sec() < 10:
+        if last_pose and (rospy.Time.now() - last_pose).to_sec() > 5:
+            if (rospy.Time.now() - last_pose).to_sec() < 30:
                 arm_between_pointing_posture()
             else:
                 arm_to_rest_posture()
