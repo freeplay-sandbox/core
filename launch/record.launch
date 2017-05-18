@@ -1,16 +1,17 @@
 
 <launch>
 
-    <arg name="camera1"              default="camera_1" />
-    <arg name="camera2"              default="camera_2" />
+    <arg name="camera1"              default="camera_purple" />
+    <arg name="camera2"              default="camera_yellow" />
     <arg name="env_camera"           default="env_camera" />
     <arg name="duration"             default="1m" />
+    <arg name="output_file"          default="visual_tracking" />
 
     <arg name="topics" default="/tf
 
                                 /footprints
                                 /zones
-                                /sandbox/image
+                                /sandtray/background/image
 
                                 $(arg camera1)/audio
                                 $(arg camera2)/audio
@@ -30,7 +31,7 @@
                                 "/>
 
      <node pkg="rosbag" type="record" name="rosbag_record_freeplay_sandbox"
-         args="-o freeplay-sandbox $(arg topics) --duration=$(arg duration)"
+         args="--output-name $(arg output_file) $(arg topics) --duration=$(arg duration)"
          output="screen" required="true" />
 
 </launch>
