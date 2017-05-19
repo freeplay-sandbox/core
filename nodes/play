@@ -209,7 +209,7 @@ def dist(a, b=(0,0)):
 
 
 def get_point_in_zone(zone, closeto=None):
-    if len(ZONES) == 0 or len(ZONES[zone]) == 0:
+    if len(ZONES) == 0 or zone not in ZONES or len(ZONES[zone]) == 0:
         return None
 
     # randomize regions
