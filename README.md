@@ -228,3 +228,11 @@ ROS wrapper for the chilitags library)
 To enable marker-based localisation, launch `play.launch` with the option
 `with_marker_localisation:=true`.
 
+### Disabling gnome-shell gestures
+
+To disable `gnome-shell` gestures, open LookingGlass (Alt+F2 > `lg`) and execute
+the following command:
+
+```javascript
+global.stage.get_actions().forEach(a => a.enabled = false);
+```
