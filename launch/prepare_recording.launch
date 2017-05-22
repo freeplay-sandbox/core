@@ -9,8 +9,6 @@
     <include file="$(find freeplay_sandbox)/launch/dual_sr300.launch">
         <arg name="camera1"         value="$(arg camera1)" />
         <arg name="camera2"         value="$(arg camera2)" />
-        <arg name="color_width"     value="960" />
-        <arg name="color_height"    value="540" />
         <arg name="enable_audio"    value="true" />
     </include>
 

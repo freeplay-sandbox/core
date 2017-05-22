@@ -10,8 +10,8 @@
 
     <!-- Best know configuration for generating depth registered point cloud. -->
     <arg name="mode"            default="manual" /> <!-- ' preset': uses cameras'  defaults, 'manual': enable setting WxH, FPS -->
-    <arg name="color_width"     default="640" />
-    <arg name="color_height"    default="480" />
+    <arg name="color_width"     default="960" />
+    <arg name="color_height"    default="540" />
     <arg name="depth_width"     default="640" />
     <arg name="depth_height"    default="480" />
     <arg name="depth_fps"       default="30" />
