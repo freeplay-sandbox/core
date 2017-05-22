@@ -21,40 +21,40 @@ size_t nb_measures;
 double total_distance;
 double total_baseline_distance;
 
-void onSignal(ros::NodeHandle& rosNode, shared_ptr<tf::TransformListener> tl, const std_msgs::EmptyConstPtr& sig) {
+void onSignalStarted(ros::NodeHandle& rosNode, shared_ptr<tf::TransformListener> tl, const std_msgs::EmptyConstPtr& sig) {
 
-    if (calibrationrunning) {
-        ROS_INFO("Stopping visual focus calibration.");
-        calibrationrunning = false;
+    ROS_INFO_STREAM("Starting visual focus calibration. First, waiting for the target to be published...");
 
-        ROS_INFO("Calibration summary");
-        ROS_INFO("===================");
-        ROS_INFO_STREAM("Total distance gaze to target: " << total_distance << "m");
-        ROS_INFO_STREAM("Average distance gaze to target: " << total_distance/nb_measures << "m");
-        ROS_INFO_STREAM("Total baseline distance (from sandtray centre) to target: " << total_baseline_distance << "m");
-        ROS_INFO_STREAM("Average baseline distance (from sandtray centre) to target: " << total_baseline_distance/nb_measures << "m");
-        ROS_INFO_STREAM("Improvement wrt baseline: " << ceil((total_baseline_distance - total_distance)/total_baseline_distance * 100) << "%");
+    tl->waitForTransform(gazeFrame, targetFrame, ros::Time(), ros::Duration(1));
+
+    // initially, the visual target lays at the centre of the sandtray.
+    // Use this position as a gaze baseline (as if the user is always staring at the centre of the screen)
+    tl->lookupTransform(targetFrame, referenceFrame, ros::Time(), sandtray_centre);
+
+    ROS_INFO("Alright, starting!");
+
+    nb_measures = 0;
+    total_distance = 0;
+    total_baseline_distance = 0;
+    calibrationrunning = true;
 
 
+}
 
-    }
-    else {
-        ROS_INFO_STREAM("Starting visual focus calibration. First, waiting for the target to be published...");
+void onSignalEnded(ros::NodeHandle& rosNode, shared_ptr<tf::TransformListener> tl, const std_msgs::EmptyConstPtr& sig) {
 
-        tl->waitForTransform(gazeFrame, targetFrame, ros::Time(), ros::Duration(1));
+    ROS_INFO("Stopping visual focus calibration.");
+    calibrationrunning = false;
 
-        // initially, the visual target lays at the centre of the sandtray.
-        // Use this position as a gaze baseline (as if the user is always staring at the centre of the screen)
-        tl->lookupTransform(targetFrame, referenceFrame, ros::Time(), sandtray_centre);
+    ROS_INFO("Calibration summary");
+    ROS_INFO("===================");
+    ROS_INFO_STREAM("Total distance gaze to target: " << total_distance << "m");
+    ROS_INFO_STREAM("Average distance gaze to target: " << total_distance/nb_measures << "m");
+    ROS_INFO_STREAM("Total baseline distance (from sandtray centre) to target: " << total_baseline_distance << "m");
+    ROS_INFO_STREAM("Average baseline distance (from sandtray centre) to target: " << total_baseline_distance/nb_measures << "m");
+    ROS_INFO_STREAM("Improvement wrt baseline: " << ceil((total_baseline_distance - total_distance)/total_baseline_distance * 100) << "%");
 
-        ROS_INFO("Alright, starting!");
 
-        nb_measures = 0;
-        total_distance = 0;
-        total_baseline_distance = 0;
-        calibrationrunning = true;
-
-    }
 
 }
 
@@ -68,8 +68,10 @@ int main(int argc, char* argv[])
     auto tl = make_shared<tf::TransformListener>();
 
     // load parameters
-    string signalingTopic;
-    _private_node.param<string>("signaling_topic", signalingTopic, "sandtray/signals/start_visual_tracking_calibration");
+    string signalingTopicStarted;
+    string signalingTopicEnded;
+    _private_node.param<string>("signaling_topic_starting", signalingTopicStarted, "sandtray/signals/visual_tracking_calibration_started");
+    _private_node.param<string>("signaling_topic_ending", signalingTopicEnded, "sandtray/signals/visual_tracking_calibration_ended");
 
     _private_node.param<string>("target_frame", targetFrame, "visual_target");
     _private_node.param<string>("gaze_frame", gazeFrame, "gazepose_0");
@@ -86,14 +88,21 @@ int main(int argc, char* argv[])
 
     
 
-    ros::Subscriber signal_sub = rosNode.subscribe<std_msgs::Empty>(signalingTopic, 
+    ros::Subscriber signal_sub_started = rosNode.subscribe<std_msgs::Empty>(signalingTopicStarted, 
                                                                     1, 
-                                                                    boost::bind(onSignal, 
+                                                                    boost::bind(onSignalStarted, 
                                                                                 rosNode, 
                                                                                 tl,
                                                                                 _1));
 
-    ROS_INFO_STREAM("visualfocus_calibration is ready. Distance between " << targetFrame << " and " << gazeFrame << " will be computed when calibration is triggered on " << signalingTopic);
+    ros::Subscriber signal_sub_ended = rosNode.subscribe<std_msgs::Empty>(signalingTopicEnded, 
+                                                                    1, 
+                                                                    boost::bind(onSignalEnded, 
+                                                                                rosNode, 
+                                                                                tl,
+                                                                                _1));
+
+    ROS_INFO_STREAM("visualfocus_calibration is ready. Distance between " << targetFrame << " and " << gazeFrame << " will be computed when calibration is triggered on " << signalingTopicStarted);
 
     tf::StampedTransform gaze_to_target;
     tf::StampedTransform target_to_reference;

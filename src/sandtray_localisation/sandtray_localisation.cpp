@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 
     // load parameters
     string signalingTopic;
-    _private_node.param<string>("signaling_topic", signalingTopic, "signal_sandtray_robot_localising");
+    _private_node.param<string>("signaling_topic", signalingTopic, "sandtray/signals/robot_localising");
 
     _private_node.param<string>("target_frame", targetFrame, "sandtray");
     _private_node.param<string>("robot_reference_frame", robotReferenceFrame, "odom");

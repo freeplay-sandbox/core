@@ -204,16 +204,16 @@ marker. This marker can be used by the robot to localise itself wrt to the
 sandtray.
 
 When running, a dedicated node (`sandtray_localisation`) listens on a special
-topic (by default, `/sandtray_localising`) for a signal (ie, an empty message).
-The signal is emitted by the sandtray when it shows the fiducial marker. Upon
-reception of the signal, it attempts to detect a specific fiducial marker (by
-default, chilitags '709', can be set with `_marker_id:=...`) of a specific size
-(by default 10cm, can be set with `_marker_size:=...`). If the marker is found
-within 5 seconds, the node starts to publish a static transform between frames
-`_target_frame` (by default, `sandtray`) and `_reference_frame` (by default,
-`odom`), thus making all the robot TF frames visible from the `sandtray` base
-frame. If the robot successfully detects the fiducial marker, it says "I know
-where I am".
+topic (by default, `/sandtray/signals/robot_localising`) for a signal (ie, an
+empty message).  The signal is emitted by the sandtray when it shows the
+fiducial marker. Upon reception of the signal, it attempts to detect a specific
+fiducial marker (by default, chilitags '709', can be set with `_marker_id:=...`)
+of a specific size (by default 10cm, can be set with `_marker_size:=...`). If
+the marker is found within 5 seconds, the node starts to publish a static
+transform between frames `_target_frame` (by default, `sandtray`) and
+`_reference_frame` (by default, `odom`), thus making all the robot TF frames
+visible from the `sandtray` base frame. If the robot successfully detects the
+fiducial marker, it says "I know where I am".
 
 Everytime a new signal is received, the transform is updated: if you move the
 robot, simply tap again on the bottom right corner, and the robot will
