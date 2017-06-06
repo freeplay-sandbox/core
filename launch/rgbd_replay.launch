@@ -87,6 +87,22 @@
 
     </group>
 
+    <node pkg="image_transport" type="republish" name="camera1_rgb_republish"
+          required="true" output="screen"
+          args="compressed in:=$(arg camera1)/rgb/image_raw raw out:=$(arg camera1)/rgb/image_raw" />
+
+    <node pkg="image_transport" type="republish" name="camera1_depth_republish"
+          required="true" output="screen"
+          args="compressedDepth in:=$(arg camera1)/depth/image_raw raw out:=$(arg camera1)/depth/image_raw" />
+
+
+    <node pkg="image_transport" type="republish" name="camera2_rgb_republish"
+          required="true" output="screen"
+          args="compressed in:=$(arg camera2)/rgb/image_raw raw out:=$(arg camera2)/rgb/image_raw" />
+
+    <node pkg="image_transport" type="republish" name="camera2_depth_republish"
+          required="true" output="screen"
+          args="compressedDepth in:=$(arg camera2)/depth/image_raw raw out:=$(arg camera2)/depth/image_raw" />
 
     <node  if="$(arg loop)" pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox" required="true"
         args="--loop $(arg bag) --start $(arg start)"
