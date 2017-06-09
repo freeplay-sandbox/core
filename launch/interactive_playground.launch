@@ -1,4 +1,7 @@
 <launch>
+    <!-- does not seem to work, for some reason...? [works well if set up from rqt_dynamic_reconfigure, though] -->
+    <param name="/sandtray/background/image/compressed/format"           type="str" value="png" /> <!-- jpeg/png -->
+    <param name="/sandtray/background/image/compressed/png_level"        type="int" value="3" />
 
     <!-- load sandtray URDF + cameras frames -->
     <include file="$(find freeplay_sandbox)/launch/sandtray.launch" />

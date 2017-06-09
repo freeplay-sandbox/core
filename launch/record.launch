@@ -11,7 +11,7 @@
 
                                 /footprints
                                 /zones
-                                /sandtray/background/image
+                                /sandtray/background/image/compressed
 
                                 $(arg camera1)/audio
                                 $(arg camera2)/audio
