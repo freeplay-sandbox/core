@@ -25,7 +25,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: env_camera
+    SyncSource: sandbox background
 Visualization Manager:
   Class: ""
   Displays:
@@ -82,6 +82,30 @@ Visualization Manager:
         sandbox background: true
         zones: true
       Zoom Factor: 1
+    - Class: rviz/Camera
+      Enabled: true
+      Image Rendering: background and overlay
+      Image Topic: /camera_purple/depth/image_raw
+      Name: camera_purple depth
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: ""
+      Unreliable: false
+      Value: true
+      Visibility:
+        Grid: true
+        PointCloud2: true
+        SandtrayModel: true
+        TF: true
+        Value: true
+        camera_purple RGB: true
+        camera_purple depth: true
+        camera_yellow RGB: true
+        camera_yellow depth: true
+        env_camera: true
+        sandbox background: true
+        zones: true
+      Zoom Factor: 1
     - Alpha: 0.5
       Cell Size: 1
       Class: rviz/Grid
@@ -100,29 +124,6 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
-    - Class: rviz/Camera
-      Enabled: true
-      Image Rendering: background and overlay
-      Image Topic: /camera_purple/depth/image_raw
-      Name: camera_purple depth
-      Overlay Alpha: 0.5
-      Queue Size: 2
-      Transport Hint: ""
-      Unreliable: false
-      Value: true
-      Visibility:
-        Grid: true
-        PointCloud2: true
-        SandtrayModel: true
-        TF: true
-        Value: true
-        camera_purple RGB: true
-        camera_yellow RGB: true
-        camera_yellow depth: true
-        env_camera: true
-        sandbox background: true
-        zones: true
-      Zoom Factor: 1
     - Class: rviz/TF
       Enabled: true
       Frame Timeout: 15
@@ -160,15 +161,13 @@ Visualization Manager:
           Value: true
         caravan:
           Value: true
+        child_purple_0:
+          Value: true
         crocodile:
           Value: true
         elephant:
           Value: true
-        env_camera_ir_optical_frame:
-          Value: true
         env_camera_link:
-          Value: true
-        env_camera_rgb_optical_frame:
           Value: true
         giraffe:
           Value: true
@@ -181,6 +180,8 @@ Visualization Manager:
         sandtray:
           Value: true
         touch1:
+          Value: true
+        visual_target:
           Value: true
         zebra:
           Value: true
@@ -196,24 +197,9 @@ Visualization Manager:
           boy:
             {}
           camera_purple_link:
-            camera_purple_depth_frame:
-              camera_purple_depth_optical_frame:
-                {}
-            camera_purple_ir_frame:
-              camera_ir_optical_frame:
-                {}
-            camera_purple_rgb_frame:
-              camera_purple_rgb_optical_frame:
-                {}
+            {}
           camera_yellow_link:
-            camera_yellow_depth_frame:
-              camera_yellow_depth_optical_frame:
-                {}
-            camera_yellow_ir_frame:
-              {}
-            camera_yellow_rgb_frame:
-              camera_yellow_rgb_optical_frame:
-                {}
+            {}
           caravan:
             {}
           crocodile:
@@ -221,9 +207,7 @@ Visualization Manager:
           elephant:
             {}
           env_camera_link:
-            env_camera_rgb_optical_frame:
-              env_camera_ir_optical_frame:
-                {}
+            {}
           giraffe:
             {}
           girl:
@@ -233,6 +217,8 @@ Visualization Manager:
           lion:
             {}
           touch1:
+            {}
+          visual_target:
             {}
           zebra:
             {}
@@ -345,7 +331,12 @@ Visualization Manager:
       Marker Topic: /zones
       Name: zones
       Namespaces:
-        {}
+        sandbox_zone_black: true
+        sandbox_zone_blue: true
+        sandbox_zone_green: true
+        sandbox_zone_purple: true
+        sandbox_zone_white: true
+        sandbox_zone_yellow: true
       Queue Size: 100
       Value: true
     - Class: rviz/Camera
@@ -409,10 +400,10 @@ Visualization Manager:
       Focal Shape Size: 0.0500000007
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.77979672
+      Pitch: 0.749796748
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.78541422
+      Yaw: 4.77541399
     Saved: ~
 Window Geometry:
   Camera - RGB:
