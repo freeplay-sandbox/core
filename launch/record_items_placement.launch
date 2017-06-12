@@ -1,0 +1,21 @@
+
+<launch>
+
+    <arg name="camera1"              default="camera_purple" />
+    <arg name="camera2"              default="camera_yellow" />
+    <arg name="duration"             default="15m" />
+    <arg name="output_file"          default="items_placement" />
+
+    <arg name="topics" default="$(arg camera1)/audio
+                                $(arg camera2)/audio
+
+                                $(arg env_camera)/qhd/camera_info 
+                                $(arg env_camera)/qhd/image_color/compressed 
+
+                                "/>
+
+     <node pkg="rosbag" type="record" name="rosbag_record_items_placement"
+         args="--output-name $(arg output_file) $(arg topics) --duration=$(arg duration)"
+         output="screen" required="true" />
+
+</launch>
