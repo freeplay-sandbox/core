@@ -15,7 +15,10 @@
     <arg name="bag" />
 
     <arg name="loop" default="false" />
+    <arg name="keepalive" default="true" />
     <arg name="start" default="0" />
+    <arg name="delay" default="0" />
+    <arg name="rate" default="1.0" />
 
     <!-- Disable respawn topics by default -->
     <arg name="respawn" default="false" />
@@ -87,28 +90,53 @@
 
     </group>
 
+    <!-- Republish camera1 -->
     <node pkg="image_transport" type="republish" name="camera1_rgb_republish"
           required="true" output="screen"
-          args="compressed in:=$(arg camera1)/rgb/image_raw raw out:=$(arg camera1)/rgb/image_raw" />
+          args="compressed in:=$(arg camera1)/rgb/image_raw out:=$(arg camera1)/rgb/image_raw" />
 
     <node pkg="image_transport" type="republish" name="camera1_depth_republish"
           required="true" output="screen"
-          args="compressedDepth in:=$(arg camera1)/depth/image_raw raw out:=$(arg camera1)/depth/image_raw" />
+          args="compressedDepth in:=$(arg camera1)/depth/image_raw out:=$(arg camera1)/depth/image_raw" />
 
 
+    <!-- Republish camera1 -->
     <node pkg="image_transport" type="republish" name="camera2_rgb_republish"
           required="true" output="screen"
-          args="compressed in:=$(arg camera2)/rgb/image_raw raw out:=$(arg camera2)/rgb/image_raw" />
+          args="compressed in:=$(arg camera2)/rgb/image_raw out:=$(arg camera2)/rgb/image_raw" />
 
     <node pkg="image_transport" type="republish" name="camera2_depth_republish"
           required="true" output="screen"
-          args="compressedDepth in:=$(arg camera2)/depth/image_raw raw out:=$(arg camera2)/depth/image_raw" />
+          args="compressedDepth in:=$(arg camera2)/depth/image_raw out:=$(arg camera2)/depth/image_raw" />
 
-    <node  if="$(arg loop)" pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox" required="true"
-        args="--loop $(arg bag) --start $(arg start)"
+    <!-- Republish env_camera -->
+    <node pkg="image_transport" type="republish" name="env_camera_rgb_republish"
+          required="true" output="screen"
+          args="compressed in:=$(arg env_camera)/qhd/image_color out:=$(arg env_camera)/image" />
+
+    <!-- Republish sandtray background -->
+    <!--
+    <node pkg="topic_tools" type="throttle" name="sandtray_images_throttle"
+        args="messages /sandtray/background/image 4.0"
+        output="screen" required="true" />
+        <node pkg="image_transport" type="republish" name="sandtray_background_republish"
+          required="true" output="screen"
+          args="compress in:=/sandtray/background/image out:=/sandtray/background/image_" />
+          -->
+
+    <!-- replay the bag file! -->
+    <group if="$(arg loop)">
+    <node pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox" required="true"
+        args="--loop $(arg bag) -s $(arg start) -r $(arg rate) -d $(arg delay)"
         output="screen" />
-    <node  unless="$(arg loop)" pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox" required="true"
-        args="--keep-alive $(arg bag) --start $(arg start)"
-        output="screen" />
+    </group>
+    <group unless="$(arg loop)">
+        <node if="$(arg keepalive)" pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox" required="true"
+            args="--keep-alive $(arg bag)  -s $(arg start) -r $(arg rate) -d $(arg delay)"
+            output="screen" />
+        <node unless="$(arg keepalive)" pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox" required="true"
+            args="$(arg bag)  -s $(arg start) -r $(arg rate) -d $(arg delay)"
+            output="screen" />
+    </group>
 
 </launch>
