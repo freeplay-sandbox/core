@@ -3,6 +3,7 @@
 
     <arg name="camera1"              default="camera_purple" />
     <arg name="camera2"              default="camera_yellow" />
+    <arg name="env_camera"           default="env_camera" />
     <arg name="duration"             default="15m" />
     <arg name="output_file"          default="items_placement" />
 
