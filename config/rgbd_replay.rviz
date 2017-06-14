@@ -1,0 +1,797 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 0
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Zones1/Namespaces1
+        - /Sandbox background image1/Status1
+      Splitter Ratio: 0.613259673
+    Tree Height: 515
+  - Class: rviz/Selection
+    Name: Selection
+  - Class: rviz/Tool Properties
+    Expanded:
+      - /2D Pose Estimate1
+      - /2D Nav Goal1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.588679016
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+  - Class: rviz/Time
+    Experimental: false
+    Name: Time
+    SyncMode: 0
+    SyncSource: Sandbox background image
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.5
+      Cell Size: 1
+      Class: rviz/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.0299999993
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        CameraBottom_frame:
+          Value: true
+        CameraBottom_optical_frame:
+          Value: true
+        CameraTop_frame:
+          Value: true
+        CameraTop_optical_frame:
+          Value: true
+        ChestButton_frame:
+          Value: true
+        Head:
+          Value: true
+        HeadTouchFront_frame:
+          Value: true
+        HeadTouchMiddle_frame:
+          Value: true
+        HeadTouchRear_frame:
+          Value: true
+        ImuTorsoAccelerometer_frame:
+          Value: true
+        ImuTorsoGyrometer_frame:
+          Value: true
+        LAnklePitch:
+          Value: true
+        LBicep:
+          Value: true
+        LElbow:
+          Value: true
+        LFinger11_link:
+          Value: true
+        LFinger12_link:
+          Value: true
+        LFinger13_link:
+          Value: true
+        LFinger21_link:
+          Value: true
+        LFinger22_link:
+          Value: true
+        LFinger23_link:
+          Value: true
+        LFootBumperLeft_frame:
+          Value: true
+        LFootBumperRight_frame:
+          Value: true
+        LForeArm:
+          Value: true
+        LFsrFL_frame:
+          Value: true
+        LFsrFR_frame:
+          Value: true
+        LFsrRL_frame:
+          Value: true
+        LFsrRR_frame:
+          Value: true
+        LHandTouchBack_frame:
+          Value: true
+        LHandTouchLeft_frame:
+          Value: true
+        LHandTouchRight_frame:
+          Value: true
+        LHip:
+          Value: true
+        LInfraRed_frame:
+          Value: true
+        LPelvis:
+          Value: true
+        LShoulder:
+          Value: true
+        LSonar_frame:
+          Value: true
+        LThigh:
+          Value: true
+        LThumb1_link:
+          Value: true
+        LThumb2_link:
+          Value: true
+        LTibia:
+          Value: true
+        MicroFrontCenter_frame:
+          Value: true
+        MicroRearCenter_frame:
+          Value: true
+        MicroSurroundLeft_frame:
+          Value: true
+        MicroSurroundRight_frame:
+          Value: true
+        Neck:
+          Value: true
+        RAnklePitch:
+          Value: true
+        RBicep:
+          Value: true
+        RElbow:
+          Value: true
+        RFinger11_link:
+          Value: true
+        RFinger12_link:
+          Value: true
+        RFinger13_link:
+          Value: true
+        RFinger21_link:
+          Value: true
+        RFinger22_link:
+          Value: true
+        RFinger23_link:
+          Value: true
+        RFootBumperLeft_frame:
+          Value: true
+        RFootBumperRight_frame:
+          Value: true
+        RForeArm:
+          Value: true
+        RFsrFL_frame:
+          Value: true
+        RFsrFR_frame:
+          Value: true
+        RFsrRL_frame:
+          Value: true
+        RFsrRR_frame:
+          Value: true
+        RHandTouchBack_frame:
+          Value: true
+        RHandTouchLeft_frame:
+          Value: true
+        RHandTouchRight_frame:
+          Value: true
+        RHip:
+          Value: true
+        RInfraRed_frame:
+          Value: true
+        RPelvis:
+          Value: true
+        RShoulder:
+          Value: true
+        RSonar_frame:
+          Value: true
+        RThigh:
+          Value: true
+        RThumb1_link:
+          Value: true
+        RThumb2_link:
+          Value: true
+        RTibia:
+          Value: true
+        arm_reach:
+          Value: true
+        ball:
+          Value: true
+        base_footprint:
+          Value: true
+        base_link:
+          Value: true
+        boy:
+          Value: true
+        camera_ir_optical_frame:
+          Value: true
+        camera_purple_depth_frame:
+          Value: true
+        camera_purple_depth_optical_frame:
+          Value: true
+        camera_purple_ir_frame:
+          Value: true
+        camera_purple_ir_optical_frame:
+          Value: true
+        camera_purple_link:
+          Value: true
+        camera_purple_rgb_frame:
+          Value: true
+        camera_purple_rgb_optical_frame:
+          Value: true
+        camera_yellow_depth_frame:
+          Value: true
+        camera_yellow_depth_optical_frame:
+          Value: true
+        camera_yellow_ir_frame:
+          Value: true
+        camera_yellow_ir_optical_frame:
+          Value: true
+        camera_yellow_link:
+          Value: true
+        camera_yellow_rgb_frame:
+          Value: true
+        camera_yellow_rgb_optical_frame:
+          Value: true
+        caravan:
+          Value: true
+        child_purple_0:
+          Value: true
+        child_purple_1:
+          Value: true
+        child_yellow_0:
+          Value: true
+        crocodile:
+          Value: true
+        elephant:
+          Value: true
+        env_camera_ir_optical_frame:
+          Value: true
+        env_camera_link:
+          Value: true
+        env_camera_rgb_optical_frame:
+          Value: true
+        gaze:
+          Value: true
+        giraffe:
+          Value: true
+        girl:
+          Value: true
+        hippo:
+          Value: true
+        l_ankle:
+          Value: true
+        l_gripper:
+          Value: true
+        l_sole:
+          Value: true
+        l_wrist:
+          Value: true
+        lion:
+          Value: true
+        odom:
+          Value: true
+        r_ankle:
+          Value: true
+        r_gripper:
+          Value: true
+        r_sole:
+          Value: true
+        r_wrist:
+          Value: true
+        sandtray:
+          Value: true
+        torso:
+          Value: true
+        touch1:
+          Value: true
+        touch2:
+          Value: true
+        zebra:
+          Value: true
+      Marker Scale: 0.100000001
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        odom:
+          base_link:
+            base_footprint:
+              {}
+            torso:
+              ChestButton_frame:
+                {}
+              ImuTorsoAccelerometer_frame:
+                {}
+              ImuTorsoGyrometer_frame:
+                {}
+              LPelvis:
+                LHip:
+                  LThigh:
+                    LTibia:
+                      LAnklePitch:
+                        l_ankle:
+                          LFootBumperLeft_frame:
+                            {}
+                          LFootBumperRight_frame:
+                            {}
+                          LFsrFL_frame:
+                            {}
+                          LFsrFR_frame:
+                            {}
+                          LFsrRL_frame:
+                            {}
+                          LFsrRR_frame:
+                            {}
+                          l_sole:
+                            {}
+              LShoulder:
+                LBicep:
+                  LElbow:
+                    LForeArm:
+                      l_wrist:
+                        LFinger11_link:
+                          LFinger12_link:
+                            LFinger13_link:
+                              {}
+                        LFinger21_link:
+                          LFinger22_link:
+                            LFinger23_link:
+                              {}
+                        LHandTouchBack_frame:
+                          {}
+                        LHandTouchLeft_frame:
+                          {}
+                        LHandTouchRight_frame:
+                          {}
+                        LThumb1_link:
+                          LThumb2_link:
+                            {}
+                        l_gripper:
+                          {}
+              LSonar_frame:
+                {}
+              Neck:
+                Head:
+                  CameraBottom_frame:
+                    CameraBottom_optical_frame:
+                      {}
+                  CameraTop_frame:
+                    CameraTop_optical_frame:
+                      {}
+                  HeadTouchFront_frame:
+                    {}
+                  HeadTouchMiddle_frame:
+                    {}
+                  HeadTouchRear_frame:
+                    {}
+                  LInfraRed_frame:
+                    {}
+                  MicroFrontCenter_frame:
+                    {}
+                  MicroRearCenter_frame:
+                    {}
+                  MicroSurroundLeft_frame:
+                    {}
+                  MicroSurroundRight_frame:
+                    {}
+                  RInfraRed_frame:
+                    {}
+                  gaze:
+                    {}
+              RPelvis:
+                RHip:
+                  RThigh:
+                    RTibia:
+                      RAnklePitch:
+                        r_ankle:
+                          RFootBumperLeft_frame:
+                            {}
+                          RFootBumperRight_frame:
+                            {}
+                          RFsrFL_frame:
+                            {}
+                          RFsrFR_frame:
+                            {}
+                          RFsrRL_frame:
+                            {}
+                          RFsrRR_frame:
+                            {}
+                          r_sole:
+                            {}
+              RShoulder:
+                RBicep:
+                  RElbow:
+                    RForeArm:
+                      r_wrist:
+                        RFinger11_link:
+                          RFinger12_link:
+                            RFinger13_link:
+                              {}
+                        RFinger21_link:
+                          RFinger22_link:
+                            RFinger23_link:
+                              {}
+                        RHandTouchBack_frame:
+                          {}
+                        RHandTouchLeft_frame:
+                          {}
+                        RHandTouchRight_frame:
+                          {}
+                        RThumb1_link:
+                          RThumb2_link:
+                            {}
+                        r_gripper:
+                          {}
+              RSonar_frame:
+                {}
+        sandtray:
+          arm_reach:
+            {}
+          ball:
+            {}
+          boy:
+            {}
+          camera_purple_link:
+            camera_purple_depth_frame:
+              camera_purple_depth_optical_frame:
+                {}
+            camera_purple_ir_frame:
+              camera_purple_ir_optical_frame:
+                {}
+            camera_purple_rgb_frame:
+              camera_purple_rgb_optical_frame:
+                child_purple_0:
+                  {}
+                child_purple_1:
+                  {}
+          camera_yellow_link:
+            camera_yellow_depth_frame:
+              camera_yellow_depth_optical_frame:
+                {}
+            camera_yellow_ir_frame:
+              camera_ir_optical_frame:
+                {}
+              camera_yellow_ir_optical_frame:
+                {}
+            camera_yellow_rgb_frame:
+              camera_yellow_rgb_optical_frame:
+                child_yellow_0:
+                  {}
+          caravan:
+            {}
+          crocodile:
+            {}
+          elephant:
+            {}
+          env_camera_link:
+            env_camera_rgb_optical_frame:
+              env_camera_ir_optical_frame:
+                {}
+          giraffe:
+            {}
+          girl:
+            {}
+          hippo:
+            {}
+          lion:
+            {}
+          touch1:
+            {}
+          touch2:
+            {}
+          zebra:
+            {}
+      Update Interval: 0
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /zones
+      Name: Zones
+      Namespaces:
+        sandbox_zone_black: true
+        sandbox_zone_blue: true
+        sandbox_zone_green: true
+        sandbox_zone_white: true
+        sandbox_zone_yellow: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /estimate_focus
+      Name: Attention targets
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Camera
+      Enabled: true
+      Image Rendering: background and overlay
+      Image Topic: /sandtray/background/image
+      Name: Sandbox background image
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: compressed
+      Unreliable: false
+      Value: true
+      Visibility:
+        Attention targets: true
+        Grid: true
+        Purple RGB: true
+        Purple depth (metric, rect): true
+        Purple pointcloud: true
+        Sandtray model: true
+        TF: true
+        Value: true
+        Yellow RGB: true
+        Yellow depth (metric, rect): true
+        Yellow pointcloud: true
+        Zones: true
+      Zoom Factor: 1
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        camera_purple_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        camera_yellow_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        env_camera_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        sandtray:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Name: Sandtray model
+      Robot Description: sandtray_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Purple pointcloud
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.00200000009
+      Style: Flat Squares
+      Topic: /participant_purple/depth_registered/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Yellow pointcloud
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.00200000009
+      Style: Flat Squares
+      Topic: /participant_yellow/depth_registered/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Class: rviz/Camera
+      Enabled: true
+      Image Rendering: background and overlay
+      Image Topic: /participant_yellow/rgb/image_rect_color
+      Name: Yellow RGB
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: compressed
+      Unreliable: false
+      Value: true
+      Visibility:
+        Attention targets: true
+        Grid: true
+        Purple RGB: true
+        Purple depth (metric, rect): true
+        Purple pointcloud: true
+        Sandbox background image: true
+        Sandtray model: true
+        TF: true
+        Value: true
+        Yellow depth (metric, rect): true
+        Yellow pointcloud: true
+        Zones: true
+      Zoom Factor: 1
+    - Class: rviz/Camera
+      Enabled: true
+      Image Rendering: background and overlay
+      Image Topic: /participant_purple/rgb/image_rect_color
+      Name: Purple RGB
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: compressed
+      Unreliable: false
+      Value: true
+      Visibility:
+        Attention targets: true
+        Grid: true
+        Purple depth (metric, rect): true
+        Purple pointcloud: true
+        Sandbox background image: true
+        Sandtray model: true
+        TF: true
+        Value: true
+        Yellow RGB: true
+        Yellow depth (metric, rect): true
+        Yellow pointcloud: true
+        Zones: true
+      Zoom Factor: 1
+    - Class: rviz/Camera
+      Enabled: true
+      Image Rendering: background and overlay
+      Image Topic: /participant_yellow/depth_registered/sw_registered/image_rect
+      Name: Yellow depth (metric, rect)
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: compressedDepth
+      Unreliable: false
+      Value: true
+      Visibility:
+        Attention targets: true
+        Grid: true
+        Purple RGB: true
+        Purple depth (metric, rect): true
+        Purple pointcloud: true
+        Sandbox background image: true
+        Sandtray model: true
+        TF: true
+        Value: true
+        Yellow RGB: true
+        Yellow pointcloud: true
+        Zones: true
+      Zoom Factor: 1
+    - Class: rviz/Camera
+      Enabled: true
+      Image Rendering: background and overlay
+      Image Topic: /participant_purple/depth_registered/sw_registered/image_rect
+      Name: Purple depth (metric, rect)
+      Overlay Alpha: 0.5
+      Queue Size: 2
+      Transport Hint: compressedDepth
+      Unreliable: false
+      Value: true
+      Visibility:
+        Attention targets: true
+        Grid: true
+        Purple RGB: true
+        Purple pointcloud: true
+        Sandbox background image: true
+        Sandtray model: true
+        TF: true
+        Value: true
+        Yellow RGB: true
+        Yellow depth (metric, rect): true
+        Yellow pointcloud: true
+        Zones: true
+      Zoom Factor: 1
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: sandtray
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+      Topic: /initialpose
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point
+  Value: true
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Distance: 1.48526871
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.0599999987
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Focal Point:
+        X: 0.249672383
+        Y: -0.277630419
+        Z: 0.0931985825
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.0500000007
+      Name: Current View
+      Near Clip Distance: 0.00999999978
+      Pitch: 0.134797797
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)
+      Yaw: 2.5812881
+    Saved: ~
+Window Geometry:
+  Camera:
+    collapsed: false
+  Displays:
+    collapsed: false
+  Height: 1016
+  Hide Left Dock: false
+  Hide Right Dock: false
+  Purple RGB:
+    collapsed: false
+  Purple depth (metric, rect):
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd00000004000000000000016a0000024cfc020000000dfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006000fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed0000034800000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000013f0000024c000000d500fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000001200530052003300300030002000520047004200000006cf000000180000000000000000fb0000000c00430061006d00650072006100000002a50000001a0000001a0000001afb000000120053005200330030003000200052004700420000000000ffffffff0000000000000000fb0000002400730061006e00640062006f00780020006200610063006b00670072006f0075006e00640000000384000000180000000000000000fb0000000c00430061006d00650072006101000002c3000000c80000000000000000000000010000011000000300fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003f00000300000000b400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000780000000fafc010000000bfb0000003000530061006e00640062006f00780020006200610063006b00670072006f0075006e006400200069006d006100670065010000000000000167000000d900fffffffb000000140050007500720070006c00650020005200470042010000016d000001890000007800fffffffb000000360050007500720070006c006500200064006500700074006800200028006d00650074007200690063002c00200072006500630074002901000002fc000001cb000000d200fffffffb0000001400590065006c006c006f0077002000520047004201000004cd0000018f0000007800fffffffb0000003600590065006c006c006f007700200064006500700074006800200028006d00650074007200690063002c00200072006500630074002901000006620000011e000000d200fffffffb0000000a00560069006500770073030000004e00000080000002e100000197fb0000001800630061006d006500720061005f003100200052004700420000000000000000960000000000000000fb0000001c00630061006d006500720061005f00310020006400650070007400680000000000000000a20000000000000000fb000000140065006e0076005f00630061006d0065007200610000000000000000860000000000000000fb0000001800630061006d006500720061005f003200200052004700420000000000000000960000000000000000fb0000001c00630061006d006500720061005f00320020006400650070007400680000000000000007800000000000000000000000030000078000000045fc0100000002fb0000000800540069006d00650100000000000007800000025500fffffffb0000000800540069006d00650100000000000004500000000000000000000006100000024c00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Sandbox background image:
+    collapsed: false
+  Selection:
+    collapsed: false
+  Time:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: false
+  Width: 1920
+  X: 0
+  Y: 27
+  Yellow RGB:
+    collapsed: false
+  Yellow depth (metric, rect):
+    collapsed: false

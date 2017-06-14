@@ -1,8 +1,8 @@
 
 <launch>
 
-    <arg name="camera1"              default="camera_purple" />
-    <arg name="camera2"              default="camera_yellow" />
+    <arg name="camera1"              default="participant_purple" />
+    <arg name="camera2"              default="participant_yellow" />
     <arg name="env_camera"           default="env_camera" />
     <arg name="duration"             default="40m" />
     <arg name="output_file"          default="freeplay_postprocess" />
@@ -57,8 +57,8 @@
          output="screen" required="true" />
 
     <include file="$(find freeplay_sandbox)/launch/rgbd_replay.launch">
-        <arg name="camera1"         value="$(arg camera1)" />
-        <arg name="camera2"         value="$(arg camera2)" />
+        <arg name="repub1"         value="$(arg camera1)" />
+        <arg name="repub2"         value="$(arg camera2)" /> -->
         <arg name="env_camera"      value="$(arg env_camera)" />
         <arg name="loop"            value="false" />
         <arg name="start"           value="0" />
