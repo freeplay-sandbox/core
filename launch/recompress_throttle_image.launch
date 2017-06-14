@@ -1,0 +1,37 @@
+
+<launch>
+
+    <arg name="topic" default="/sandtray/background/image" />
+
+    <arg name="output_file"     default="freeplay-filtered" />
+    <arg name="bag" />
+
+    <param name="$(arg topic)_repub/compressed/format"           type="str" value="png" /> <!-- jpeg/png -->
+    <param name="$(arg topic)_repub/compressed/png_level"        type="int" value="3" />
+
+
+    <!-- Republish camera1 -->
+
+    <param name="$(arg topic)/compressed/format"           type="str" value="png" />
+    <param name="$(arg topic)/compressed/png_level"        type="int" value="3" />
+
+    <node pkg="image_transport" type="republish" name="republish"
+          required="true" output="screen"
+          args="raw in:=$(arg topic)/for_repub compressed out:=$(arg topic)" />
+
+    <node pkg="topic_tools" type="throttle" name="images_throttle"
+        args="messages $(arg topic)/compressed 4.0"
+        output="screen" required="true" />
+
+    <!-- replay the bag file! -->
+    <node pkg="rosbag" type="play" name="rosbag_play_freeplay_sandbox" required="true"
+        args="$(arg bag) --rate=1"
+        output="screen">
+        <remap from="$(arg topic)" to="$(arg topic)/for_repub" />
+    </node>
+
+    <include file="$(find freeplay_sandbox)/launch/record.launch">
+        <arg name="duration"             value="40m" />
+        <arg name="output_file"     default="$(arg output_file)" />
+    </include>
+</launch>

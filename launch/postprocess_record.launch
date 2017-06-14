@@ -23,11 +23,6 @@
     <param name="$(arg env_camera)/image/compressed/format" type="str" value="jpeg" />
     <param name="$(arg env_camera)/image/compressed/jpeg_quality" type="int" value="85" />
 
-    <!--
-    <param name="/sandtray/background/image/compressed/format"           type="str" value="png" />
-    <param name="/sandtray/background/image/compressed/png_level"        type="int" value="3" />
-    -->
-
 
     <arg name="topics" default="/tf
 
