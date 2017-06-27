@@ -6,7 +6,7 @@ GUI](https://github.com/severin-lemaignan/freeplay-sandbox-qt) of the
 'Free-play Sandbox' experimental framework for Cognitive Human-Robot
 Interaction research.*
 
-![Display in RViz of the sandbox, with a Nao robot](docs/zoo-activity.png)
+![The freeplay sandbox task](docs/freeplay.png)
 
 This repository contains  the ROS code for the 'Free-play Sandbox'
 experimental framework for HRI.
@@ -83,6 +83,8 @@ $ roslaunch freeplay_sandbox play.launch
 ```
 
 #### With the robot
+
+![Display in RViz of the sandbox, with a Nao robot](docs/zoo-activity.png)
 
 ```
 $ export NAO_IP=<the IP of the Nao>
