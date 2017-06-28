@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+import numpy
+import random
+
+import math
+import rospy
+import tf
+from threading import Event
+import actionlib
+
+from geometry_msgs.msg import PoseStamped, Point
+from std_msgs.msg import String
+from visualization_msgs.msg import MarkerArray, Marker
+import freeplay_sandbox_msgs.msg
+
+MAP_HEIGHT=0.335
+
+REFERENCE_FRAME="/sandtray"
+
+
+class ItemMover(object):
+    def __init__(self):
+        self._tl = tf.TransformListener()
+        rospy.sleep(0.5) # sleep a bit to make sure the TF cache is filled
+
+        self._goal_sub = rospy.Subscriber("sparc/selected_action", PoseStamped, self.on_goal_received)
+        self._release_robot_sub = rospy.Subscriber("sandtray/interaction_events", String, self.on_event)
+
+        self._motion = actionlib.SimpleActionClient('move_sandbox_items', freeplay_sandbox_msgs.msg.PlaygroundNavigationAction)
+        self._motion.wait_for_server()
+
+        rospy.loginfo("Ready to play!")
+        self.event_release = Event()
+        self._moving_item = None
+
+    def run(self):
+        rospy.spin()
+
+    def on_goal_received(self,movementPose):
+        item = movementPose.header.frame_id
+
+        if self._moving_item is not None:
+            self.event_release.clear()
+            self._motion.cancel_goal()
+            if self._moving_item != item:
+                self.event_release.wait()
+
+        pose = self.get_pose(item)
+        if pose is None: # frame not published yet!
+            return
+        pose = pose[0], pose[1]
+        # animal out of reach
+        if not self.reachable(pose):
+            return
+
+        pose = self._tl.transformPose("sandtray", movementPose)
+        pose =  pose.pose.position
+        if not self.reachable(pose):
+            return   
+        self._moving_item = item
+        print "sending " + item + " to " + str(pose.x) + " " + str(pose.y)
+        goal = freeplay_sandbox_msgs.msg.PlaygroundNavigationGoal(item=movementPose.header.frame_id,goal=pose)
+        self._motion.send_goal(goal)
+
+    def on_event(self,msg):
+        if msg.data.startswith("robotreleasing_"):
+            self._moving_item = None
+            self.event_release.set()
+
+    def get_pose(self,item, reference=REFERENCE_FRAME):
+        if item not in self._tl.getFrameStrings():
+            rospy.logwarn_throttle(20,"%s is not yet published." % item)
+            return None
+
+        if self._tl.canTransform(reference, item, rospy.Time(0)):
+            (trans,rot) = self._tl.lookupTransform(reference, item, rospy.Time(0))
+        else:
+            return None
+
+        return trans
+
+    def reachable(self,pose):
+        """
+        Check whether a given pose is reachable by the robot.
+        If the 'arm_reach' frame is not available, returns 0.
+        """
+        arm_reach = self.get_pose(ARM_REACH_FRAME)
+        #if arm_reach is None:
+        return True
+        x,y,z = arm_reach
+
+        return self.dist((x,y), pose) < z # by convention, 'z' is the radius of the reachable zone at sandtray's level
+
+    def dist(a, b=(0,0)):
+
+        return math.sqrt(math.pow(a[0] - b[0],2) + math.pow(a[1]-b[1],2))
+
+if __name__ == "__main__":
+
+    rospy.init_node('sandbox_player')
+    ARM_REACH_FRAME = rospy.get_param('~arm_reach_frame', "arm_reach")
+
+    rospy.loginfo("Initializing TF...")
+    mover = ItemMover()
+    mover.run()
