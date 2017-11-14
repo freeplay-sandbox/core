@@ -2,7 +2,7 @@ Free-play Sandbox -- ROS interface & autonomous play behaviour
 ==============================================================
 
 *This is the sister repository to [the QtQuick-based
-GUI](https://github.com/severin-lemaignan/freeplay-sandbox-qt) of the
+GUI](https://github.com/freeplay-sandbox/qt-gui) of the
 'Free-play Sandbox' experimental framework for Cognitive Human-Robot
 Interaction research.*
 
@@ -26,11 +26,11 @@ other versions might work as well).
 Then:
 
 ```
-> git clone https://github.com/severin-lemaignan/freeplay-sandbox-ros.git
-> cd freeplay-sandbox-ros
-> mkdir build && cd build
-> cmake -DCMAKE_BUILD_TYPE=Release ..
-> make install
+git clone https://github.com/freeplay-sandbox/core.git
+cd freeplay-sandbox-ros
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make install
 ```
 
 Usage
@@ -40,7 +40,7 @@ First, start `roscore` (and if desired, `rviz`) in a dedicated terminal.
 
 ### Starting the free-play sandbox environment
 
-- start the [GUI](https://github.com/severin-lemaignan/freeplay-sandbox-qt)
+- start the [GUI](https://github.com/freeplay-sandbox/qt-gui)
   (from QtCreator for instance). When needed, press three times in the bottom
   left corner to show the menu.
 
@@ -128,7 +128,7 @@ Data recording
 --------------
 
 Two launch files help with recording the interactions. See
-[freeplay-sandbox-analysis](https://github.com/severin-lemaignan/freeplay-sandbox-analysis)
+[`freeplay-sandbox/analysis`](https://github.com/freeplay-sandbox/analysis)
 for data analysis tools.
 
 ### Configuration of the recording
@@ -146,7 +146,7 @@ environmental camera.
 
 The launch file `record.launch` configure and execute `rosbag` to record the
 relevant topic. [See the
-source](https://github.com/severin-lemaignan/freeplay-sandbox-ros/blob/master/launch/record.launch)
+source](https://github.com/freeplay-sandbox/core/blob/master/launch/record.launch)
 for the exact list of recorded topics.
 
 Importantly, the recording duration must be set with `duration:=...` (possible
@@ -225,7 +225,7 @@ re-localise.
   - [chilitags](https://github.com/chili-epfl/chilitags) (Robust Fiducial Markers for Augmented Reality And Robotics http://chili.epfl.ch/software)
   - [ros_markers](https://github.com/chili-epfl/ros_markers) (the
 ROS wrapper for the chilitags library)
-  - [freeplay-sandbox-msgs](https://github.com/severin-lemaignan/freeplay-sandbox-msgs) (ROS messages for the freeplay_sandbox experimental framework )
+  - [freeplay-sandbox/ros-msgs](https://github.com/freeplay-sandbox/ros-msgs) (ROS messages for the freeplay_sandbox experimental framework )
 
 To enable marker-based localisation, launch `play.launch` with the option
 `with_marker_localisation:=true`.
