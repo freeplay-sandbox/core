@@ -1,10 +1,11 @@
-Free-play Sandbox -- ROS interface & autonomous play behaviour
-==============================================================
+Free-play Sandbox -- Core components
+====================================
 
-*This is the sister repository to [the QtQuick-based
-GUI](https://github.com/freeplay-sandbox/qt-gui) of the
-'Free-play Sandbox' experimental framework for Cognitive Human-Robot
-Interaction research.*
+*This project is part of the 'Free-play Sandbox' experimental framework for Cognitive Human-Robot
+Interaction research. [Check the PInSoRo website](https://freeplay-sandbox.github.io/) for details and [documentation](https://freeplay-sandbox.github.io/freeplay-software)*.
+
+
+ROS interface & autonomous play behaviour
 
 ![The freeplay sandbox task](docs/freeplay.png)
 
